@@ -621,7 +621,7 @@ void IdentifyVersion (void)
 	D_AddFile (DEVMAPS"data_se/texture1.lmp");
 	D_AddFile (DEVMAPS"data_se/pnames.lmp");
 	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
+      goto ret;
     }
 
     if (M_CheckParm ("-regdev"))
@@ -633,7 +633,7 @@ void IdentifyVersion (void)
 	D_AddFile (DEVMAPS"data_se/texture2.lmp");
 	D_AddFile (DEVMAPS"data_se/pnames.lmp");
 	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
+      goto ret;
     }
 
     if (M_CheckParm ("-comdev"))
@@ -651,7 +651,7 @@ void IdentifyVersion (void)
 	D_AddFile (DEVMAPS"cdata/texture1.lmp");
 	D_AddFile (DEVMAPS"cdata/pnames.lmp");
 	strcpy (basedefault,DEVDATA"default.cfg");
-	return;
+      goto ret;
     }
 
     if ( !access (doom2fwad,R_OK) )
@@ -662,53 +662,62 @@ void IdentifyVersion (void)
 	language = french;
 	printf("French version\n");
 	D_AddFile (doom2fwad);
-	return;
+      goto ret;
     }
 
     if ( !access (doom2wad,R_OK) )
     {
 	gamemode = commercial;
 	D_AddFile (doom2wad);
-	return;
+      goto ret;
     }
 
     if ( !access (plutoniawad, R_OK ) )
     {
       gamemode = commercial;
       D_AddFile (plutoniawad);
-      return;
+      goto ret;
     }
 
     if ( !access ( tntwad, R_OK ) )
     {
       gamemode = commercial;
       D_AddFile (tntwad);
-      return;
+      goto ret;
     }
 
     if ( !access (doomuwad,R_OK) )
     {
       gamemode = retail;
       D_AddFile (doomuwad);
-      return;
+      goto ret;
     }
 
     if ( !access (doomwad,R_OK) )
     {
       gamemode = registered;
       D_AddFile (doomwad);
-      return;
+      goto ret;
     }
 
     if ( !access (doom1wad,R_OK) )
     {
       gamemode = shareware;
       D_AddFile (doom1wad);
-      return;
+      goto ret;
     }
 
     printf("Game mode indeterminate.\n");
     gamemode = indetermined;
+
+ret:
+    free(doom1wad);
+    free(doomwad);
+    free(doomuwad);
+    free(doom2wad);
+    free(doom2fwad);
+    free(plutoniawad);
+    free(tntwad);
 
     // We don't abort. Let's see what the PWAD contains.
     //exit(1);
