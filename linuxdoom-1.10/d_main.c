@@ -578,33 +578,33 @@ void IdentifyVersion (void)
     if (!doomwaddir)
 	doomwaddir = ".";
 
+    // TODO these will leak...
+
     // Commercial.
-    doom2wad = malloc(strlen(doomwaddir)+1+9+1);
+    doom2wad = malloc(strlen(doomwaddir) + strlen("/doom2.wad") + 1);
     sprintf(doom2wad, "%s/doom2.wad", doomwaddir);
 
     // Retail.
-    doomuwad = malloc(strlen(doomwaddir)+1+8+1);
+    doomuwad = malloc(strlen(doomwaddir) + strlen("/doomu.wad") + 1);
     sprintf(doomuwad, "%s/doomu.wad", doomwaddir);
     
     // Registered.
-    doomwad = malloc(strlen(doomwaddir)+1+8+1);
+    doomwad = malloc(strlen(doomwaddir) + strlen("/doom.wad") + 1);
     sprintf(doomwad, "%s/doom.wad", doomwaddir);
     
     // Shareware.
-    doom1wad = malloc(strlen(doomwaddir)+1+9+1);
+    doom1wad = malloc(strlen(doomwaddir) + strlen("/doom1.wad") + 1);
     sprintf(doom1wad, "%s/doom1.wad", doomwaddir);
 
-     // Bug, dear Shawn.
-    // Insufficient malloc, caused spurious realloc errors.
-    plutoniawad = malloc(strlen(doomwaddir)+1+/*9*/12+1);
+    plutoniawad = malloc(strlen(doomwaddir) + strlen("/plutonia.wad") + 1);
     sprintf(plutoniawad, "%s/plutonia.wad", doomwaddir);
 
-    tntwad = malloc(strlen(doomwaddir)+1+9+1);
+    tntwad = malloc(strlen(doomwaddir) + strlen("/tnt.wad") + 1);
     sprintf(tntwad, "%s/tnt.wad", doomwaddir);
 
 
     // French stuff.
-    doom2fwad = malloc(strlen(doomwaddir)+1+10+1);
+    doom2fwad = malloc(strlen(doomwaddir) + strlen("/doom2f.wad") + 1);
     sprintf(doom2fwad, "%s/doom2f.wad", doomwaddir);
 
     home = getenv("HOME");
