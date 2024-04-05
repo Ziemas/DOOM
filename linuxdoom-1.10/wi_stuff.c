@@ -985,10 +985,6 @@ void WI_drawDeathmatchStats(void)
     int		x;
     int		y;
     int		w;
-    
-    int		lh;	// line height
-
-    lh = WI_SPACINGY;
 
     WI_slamBackground();
     
@@ -1538,7 +1534,7 @@ void WI_loadData(void)
 {
     int		i;
     int		j;
-    char	name[9];
+    char	name[32];
     anim_t*	a;
 
     if (gamemode == commercial)
@@ -1609,7 +1605,7 @@ void WI_loadData(void)
 		    if (wbs->epsd != 1 || j != 8) 
 		    {
 			// animations
-			sprintf(name, "WIA%d%.2d%.2d", wbs->epsd, j, i);  
+			sprintf(name, "WIA%1d%.2d%.2d", wbs->epsd, j, i);
 			a->p[i] = W_CacheLumpName(name, PU_STATIC);
 		    }
 		    else

@@ -149,7 +149,7 @@ int 		eventtail;
 void D_PostEvent (event_t* ev)
 {
     events[eventhead] = *ev;
-    eventhead = (++eventhead)&(MAXEVENTS-1);
+    eventhead = (eventhead + 1) & (MAXEVENTS - 1);
 }
 
 
@@ -166,7 +166,7 @@ void D_ProcessEvents (void)
 	 && (W_CheckNumForName("map01")<0) )
       return;
 	
-    for ( ; eventtail != eventhead ; eventtail = (++eventtail)&(MAXEVENTS-1) )
+    for ( ; eventtail != eventhead ; eventtail = (eventtail + 1) & (MAXEVENTS - 1) )
     {
 	ev = &events[eventtail];
 	if (M_Responder (ev))
@@ -1111,16 +1111,16 @@ void D_DoomMain (void)
     printf ("ST_Init: Init status bar.\n");
     ST_Init ();
 
-    // check for a driver that wants intermission stats
-    p = M_CheckParm ("-statcopy");
-    if (p && p<myargc-1)
-    {
-	// for statistics driver
-	extern  void*	statcopy;                            
+    //// check for a driver that wants intermission stats
+    //p = M_CheckParm ("-statcopy");
+    //if (p && p<myargc-1)
+    //{
+	//// for statistics driver
+	//extern  void*	statcopy;
 
-	statcopy = (void*)atoi(myargv[p+1]);
-	printf ("External statistics registered.\n");
-    }
+	//statcopy = (void*)atoi(myargv[p+1]);
+	//printf ("External statistics registered.\n");
+    //}
     
     // start the apropriate game based on parms
     p = M_CheckParm ("-record");
