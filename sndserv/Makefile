@@ -7,7 +7,7 @@
 #
 
 CC=gcc
-CFLAGS=-O1 -DNORMALUNIX -DLINUX -Werror=implicit-function-declaration
+CFLAGS=-std=gnu99 -Og -g -Wall -DNORMALUNIX -DLINUX -Wno-unused-const-variable -fsanitize=address,undefined # -DUSEASM
 LDFLAGS=
 LIBS=-lm
 

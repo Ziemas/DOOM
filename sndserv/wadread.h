@@ -43,7 +43,7 @@
 // Must be called before any calls to  loadlump() or getsfx().
 //
 
-void openwad(char* wadname);
+void openwad(char *wadname);
 
 //
 //  Gets a sound effect from the wad file.  The pointer points to the
@@ -53,9 +53,6 @@ void openwad(char* wadname);
 //  0x80's.  Returns the data length in len.
 //
 
-void*
-getsfx
-( char*		sfxname,
-  int*		len );
+void *getsfx(char *sfxname, int *len);
 
 #endif
