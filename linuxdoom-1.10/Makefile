@@ -6,7 +6,7 @@
 #
 CC=  gcc  # gcc or g++
 
-CFLAGS=-g -Wall -DNORMALUNIX -DLINUX -Wno-unused-const-variable # -DUSEASM
+CFLAGS=-Og -g -Wall -DNORMALUNIX -DLINUX -Wno-unused-const-variable -fsanitize=address,undefined # -DUSEASM
 LDFLAGS=-L/usr/X11R6/lib
 LIBS=-lXext -lX11 -lnsl -lm
 
