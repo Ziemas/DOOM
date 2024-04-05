@@ -7,7 +7,7 @@
 #
 
 CC=gcc
-CFLAGS=-O -DNORMALUNIX -DLINUX
+CFLAGS=-O1 -DNORMALUNIX -DLINUX -Werror=implicit-function-declaration
 LDFLAGS=
 LIBS=-lm
 
