@@ -6,9 +6,9 @@
 #
 CC=  gcc  # gcc or g++
 
-CFLAGS=-Og -g -Wall -DNORMALUNIX -DLINUX -Wno-unused-const-variable -fsanitize=address,undefined # -DUSEASM
-LDFLAGS=-L/usr/X11R6/lib
-LIBS=-lXext -lX11 -lnsl -lm
+CFLAGS=-std=gnu99 -Og -g -Wall -DNORMALUNIX -DLINUX -Wno-unused-const-variable -fsanitize=address,undefined # -DUSEASM
+LDFLAGS=
+LIBS=-lm -lSDL2
 
 # subdirectory for objects
 O=linux
