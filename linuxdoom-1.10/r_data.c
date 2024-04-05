@@ -519,13 +519,15 @@ void R_InitTextures (void)
 
 	if (offset > maxoff)
 	    I_Error ("R_InitTextures: bad texture directory");
-	
+
+    // TODO misaligned texture (will be a problem on mips)?
 	mtexture = (maptexture_t *) ( (byte *)maptex + offset);
 
-	texture = textures[i] =
+	texture =
 	    Z_Malloc (sizeof(texture_t)
 		      + sizeof(texpatch_t)*(SHORT(mtexture->patchcount)-1),
 		      PU_STATIC, 0);
+    textures[i] = texture;
 	
 	texture->width = SHORT(mtexture->width);
 	texture->height = SHORT(mtexture->height);
