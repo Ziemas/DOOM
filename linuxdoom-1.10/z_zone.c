@@ -41,6 +41,8 @@ rcsid[] = "$Id: z_zone.c,v 1.4 1997/02/03 16:47:58 b1 Exp $";
 // 
  
 #define ZONEID	0x1d4a11
+#define MEM_ALIGN sizeof(void *)
+
 
 
 typedef struct
@@ -192,7 +194,7 @@ Z_Malloc
     memblock_t* newblock;
     memblock_t*	base;
 
-    size = (size + 3) & ~3;
+    size = (size + MEM_ALIGN - 1) & ~(MEM_ALIGN - 1);
     
     // scan through the block list,
     // looking for the first free block
