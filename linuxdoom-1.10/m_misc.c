@@ -265,7 +265,7 @@ M_SaveDefaults(void)
 	int v;
 	FILE *f;
 
-	f = fopen(defaultfile, "w");
+	f = fopen(defaultfile, "w+");
 	if (!f)
 		return; // can't write the file, but don't complain
 

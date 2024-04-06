@@ -1,95 +1,57 @@
-################################################################
-#
-# $Id:$
-#
-# $Log:$
-#
-CC=  gcc  # gcc or g++
+TARGET=doom
 
-CFLAGS=-std=gnu99 -Og -g -Wall -DNORMALUNIX -DLINUX -Wno-unused-const-variable -fsanitize=address,undefined # -DUSEASM
-LDFLAGS=
-LIBS=-lm -lSDL2
+TOOLCHAIN_PREFIX ?= mips64r5900el-ps2-elf-
+CC := $(TOOLCHAIN_PREFIX)gcc
+CXX := $(TOOLCHAIN_PREFIX)g++
+AS := $(TOOLCHAIN_PREFIX)as
 
-# subdirectory for objects
-O=linux
 
-# not too sophisticated dependency
-OBJS=				\
-		$(O)/doomdef.o		\
-		$(O)/doomstat.o		\
-		$(O)/dstrings.o		\
-		$(O)/i_system.o		\
-		$(O)/i_sound.o		\
-		$(O)/i_video.o		\
-		$(O)/i_net.o			\
-		$(O)/tables.o			\
-		$(O)/f_finale.o		\
-		$(O)/f_wipe.o 		\
-		$(O)/d_main.o			\
-		$(O)/d_net.o			\
-		$(O)/d_items.o		\
-		$(O)/g_game.o			\
-		$(O)/m_menu.o			\
-		$(O)/m_misc.o			\
-		$(O)/m_argv.o  		\
-		$(O)/m_bbox.o			\
-		$(O)/m_fixed.o		\
-		$(O)/m_swap.o			\
-		$(O)/m_cheat.o		\
-		$(O)/m_random.o		\
-		$(O)/am_map.o			\
-		$(O)/p_ceilng.o		\
-		$(O)/p_doors.o		\
-		$(O)/p_enemy.o		\
-		$(O)/p_floor.o		\
-		$(O)/p_inter.o		\
-		$(O)/p_lights.o		\
-		$(O)/p_map.o			\
-		$(O)/p_maputl.o		\
-		$(O)/p_plats.o		\
-		$(O)/p_pspr.o			\
-		$(O)/p_setup.o		\
-		$(O)/p_sight.o		\
-		$(O)/p_spec.o			\
-		$(O)/p_switch.o		\
-		$(O)/p_mobj.o			\
-		$(O)/p_telept.o		\
-		$(O)/p_tick.o			\
-		$(O)/p_saveg.o		\
-		$(O)/p_user.o			\
-		$(O)/r_bsp.o			\
-		$(O)/r_data.o			\
-		$(O)/r_draw.o			\
-		$(O)/r_main.o			\
-		$(O)/r_plane.o		\
-		$(O)/r_segs.o			\
-		$(O)/r_sky.o			\
-		$(O)/r_things.o		\
-		$(O)/w_wad.o			\
-		$(O)/wi_stuff.o		\
-		$(O)/v_video.o		\
-		$(O)/st_lib.o			\
-		$(O)/st_stuff.o		\
-		$(O)/hu_stuff.o		\
-		$(O)/hu_lib.o			\
-		$(O)/s_sound.o		\
-		$(O)/z_zone.o			\
-		$(O)/info.o				\
-		$(O)/sounds.o
+SRCDIRS := . ps2
+OBJDIR := build-ps2sdk
 
-all:	 $(O)/linuxxdoom
+CXXSRC := $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.cpp))
+CSRC := $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.c))
+VUSRC := $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.dsm))
+
+CFLAGS := -D_EE -D_PS2SDK -std=gnu99 -G0 -Og -g -fno-common -fno-exceptions -Wall -Werror-implicit-function-declaration
+
+LIBS=
+
+OBJ := $(addprefix $(OBJDIR)/,$(CSRC:.c=.o) $(CXXSRC:.cpp=.o) $(VUSRC:.dsm=.o))
+DEP := $(addprefix $(OBJDIR)/,$(CSRC:.c=.d) $(CXXSRC:.cpp=.d))
+
+ASINC := $(addprefix -I,$(SRCDIRS))
+INC := $(addprefix -I,$(SRCDIRS))	\
+	-I$(PS2SDK)/common/include	    \
+	-I$(PS2SDK)/ee/include
+
+$(TARGET).elf: $(OBJ)
+	echo $(OBJ)
+	$(CXX) -o $@ $(OBJ) $(LIBS) -T $(PS2SDK)/ee/startup/linkfile -L$(PS2SDK)/ee/lib
 
 clean:
-	rm -f *.o *~ *.flc
-	rm -f linux/*
+	rm -rf $(OBJ) $(TARGET) $(DEP)
 
-$(O)/linuxxdoom:	$(OBJS) $(O)/i_main.o
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OBJS) $(O)/i_main.o \
-	-o $(O)/linuxxdoom $(LIBS)
+$(OBJDIR)/%.o: $(OBJDIR)/%.dsm_x
+	@mkdir -p $(@D)
+	dvp-as -alm=$(@:.o=.lst) $(ASINC) $< -o $@
 
-$(O)/%.o:	%.c
-	$(CC) $(CFLAGS) -c $< -o $@
+$(OBJDIR)/%.dsm_x: %.dsm
+	@mkdir -p $(@D)
+	sh joinvu $< | cpp $(ASINC) | grep -v '^#' > $@
 
-#############################################################
-#
-#############################################################
+$(OBJDIR)/%.o: %.c
+	@mkdir -p $(@D)
+	$(CC) $(CFLAGS) $(INC) -c $< -o $@
+$(OBJDIR)/%.o: %.cpp
+	@mkdir -p $(@D)
+	$(CXX) $(CFLAGS) $(INC) -c $< -o $@
+
+$(OBJDIR)/%.d: %.c
+	@mkdir -p $(@D)
+	$(CC) -MM -MT $(@:.d=.o) $(CFLAGS) $(INC) $< > $@
+$(OBJDIR)/%.d: %.cpp
+	@mkdir -p $(@D)
+	$(CXX) -MM -MT $(@:.d=.o) $(CFLAGS) $(INC) $< > $@
+
+-include $(DEP)

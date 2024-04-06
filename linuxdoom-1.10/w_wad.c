@@ -22,22 +22,20 @@
 
 static const char rcsid[] = "$Id: w_wad.c,v 1.5 1997/02/03 16:47:57 b1 Exp $";
 
-#ifdef NORMALUNIX
-#include <alloca.h>
-#include <ctype.h>
-#include <fcntl.h>
-#include <malloc.h>
-#include <string.h>
-#include <sys/stat.h>
-#include <sys/types.h>
-#include <unistd.h>
-#define O_BINARY 0
-#endif
-
 #include "doomtype.h"
 #include "i_system.h"
 #include "m_swap.h"
 #include "z_zone.h"
+
+#include <alloca.h>
+#include <ctype.h>
+#include <fcntl.h>
+#include <malloc.h>
+#include <stdio.h>
+#include <string.h>
+#include <sys/stat.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #ifdef __GNUG__
 #pragma implementation "w_wad.h"
@@ -55,15 +53,6 @@ int numlumps;
 void **lumpcache;
 
 #define strcmpi strcasecmp
-
-void
-strupr(char *s)
-{
-	while (*s) {
-		*s = toupper(*s);
-		s++;
-	}
-}
 
 int
 filelength(int handle)
@@ -143,7 +132,7 @@ W_AddFile(char *filename)
 		reloadlump = numlumps;
 	}
 
-	if ((handle = open(filename, O_RDONLY | O_BINARY)) == -1) {
+	if ((handle = open(filename, O_RDONLY)) == -1) {
 		printf(" couldn't open %s\n", filename);
 		return;
 	}
@@ -220,7 +209,7 @@ W_Reload(void)
 	if (!reloadname)
 		return;
 
-	if ((handle = open(reloadname, O_RDONLY | O_BINARY)) == -1)
+	if ((handle = open(reloadname, O_RDONLY)) == -1)
 		I_Error("W_Reload: couldn't open %s", reloadname);
 
 	read(handle, &header, sizeof(header));
@@ -402,7 +391,7 @@ W_ReadLump(int lump, void *dest)
 
 	if (l->handle == -1) {
 		// reloadable file, so use open / read / close
-		if ((handle = open(reloadname, O_RDONLY | O_BINARY)) == -1)
+		if ((handle = open(reloadname, O_RDONLY)) == -1)
 			I_Error("W_ReadLump: couldn't open %s", reloadname);
 	} else
 		handle = l->handle;
