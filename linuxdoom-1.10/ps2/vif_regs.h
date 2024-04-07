@@ -1,0 +1,134 @@
+#ifndef VIF_REGS_H_
+#define VIF_REGS_H_
+
+#define VIF0_R_STAT  0x10003800
+#define VIF0_R_FBRST 0x10003810
+#define VIF0_R_ERR   0x10003820
+#define VIF0_R_MARK  0x10003830
+#define VIF0_R_CYCLE 0x10003840
+#define VIF0_R_MODE  0x10003850
+#define VIF0_R_NUM   0x10003860
+#define VIF0_R_MASK  0x10003870
+#define VIF0_R_CODE  0x10003880
+#define VIF0_R_ITOPS 0x10003890
+#define VIF0_R_ITOP  0x100038d0
+#define VIF0_R_R0    0x10003900
+#define VIF0_R_R1    0x10003910
+#define VIF0_R_R2    0x10003920
+#define VIF0_R_R3    0x10003930
+#define VIF0_R_FIFO  0x10004000
+
+#define VIF1_R_STAT  0x10003c00
+#define VIF1_R_FBRST 0x10003c10
+#define VIF1_R_ERR   0x10003c20
+#define VIF1_R_MARK  0x10003c30
+#define VIF1_R_CYCLE 0x10003c40
+#define VIF1_R_MODE  0x10003c50
+#define VIF1_R_NUM   0x10003c60
+#define VIF1_R_MASK  0x10003c70
+#define VIF1_R_CODE  0x10003c80
+#define VIF1_R_ITOPS 0x10003c90
+#define VIF1_R_BASE  0x10003ca0
+#define VIF1_R_OFST  0x10003cb0
+#define VIF1_R_TOPS  0x10003cc0
+#define VIF1_R_ITOP  0x10003cd0
+#define VIF1_R_TOP   0x10003ce0
+#define VIF1_R_R0    0x10003d00
+#define VIF1_R_R1    0x10003d10
+#define VIF1_R_R2    0x10003d20
+#define VIF1_R_R3    0x10003d30
+#define VIF1_R_FIFO  0x10005000
+
+/* VIF1_R_STAT Fields */
+#define VIF1_STAT_FQC GENMASK(28, 24)
+#define VIF1_STAT_FDR BIT(23)
+#define VIF1_STAT_ER1 BIT(13)
+#define VIF1_STAT_ER0 BIT(12)
+#define VIF1_STAT_INT BIT(11)
+#define VIF1_STAT_VIS BIT(10)
+#define VIF1_STAT_VFS BIT(9)
+#define VIF1_STAT_VSS BIT(8)
+#define VIF1_STAT_DBF BIT(7)
+#define VIF1_STAT_MRK BIT(6)
+#define VIF1_STAT_VGW BIT(3)
+#define VIF1_STAT_VEW BIT(2)
+#define VIF1_STAT_VPS GENMASK(1, 0)
+
+/* VIF0_R_STAT Fields */
+#define VIF0_STAT_FQC GENMASK(27, 24)
+#define VIF0_STAT_ER1 BIT(13)
+#define VIF0_STAT_ER0 BIT(12)
+#define VIF0_STAT_INT BIT(11)
+#define VIF0_STAT_VIS BIT(10)
+#define VIF0_STAT_VFS BIT(9)
+#define VIF0_STAT_VSS BIT(8)
+#define VIF0_STAT_MRK BIT(6)
+#define VIF0_STAT_VEW BIT(2)
+#define VIF0_STAT_VPS GENMASK(1, 0)
+
+/* VIF0/1_R_FBRST Fields */
+#define VIF_FBRST_STC BIT(3)
+#define VIF_FBRST_STP BIT(2)
+#define VIF_FBRST_FBK BIT(1)
+#define VIF_FBRST_RST BIT(0)
+
+/* VIF0/1_R_ERR Fields */
+#define VIF_ERR_ME1 BIT(2)
+#define VIF_ERR_ME0 BIT(1)
+#define VIF_ERR_MII BIT(0)
+
+/* VIF0/1_R_MARK Fields */
+#define VIF_MARK_MARK GENMASK(15, 0)
+
+/* VIF0/1_R_CYCLE Fields */
+#define VIF_CYCLE_CL GENMASK(15, 8)
+#define VIF_CYCLE_WL GENMASK(7, 0)
+
+/* VIF0/1_R_MODE Fields */
+#define VIF_MODE_MOD GENMASK(1, 0)
+
+/* VIF0/1_R_NUM Fields */
+#define VIF_NUM_NUM GENMASK(7, 0)
+
+/* VIF0/1_R_MASK Fields */
+#define VIF_MASK_M15 GENMASK(31, 30)
+#define VIF_MASK_M14 GENMASK(29, 28)
+#define VIF_MASK_M13 GENMASK(27, 26)
+#define VIF_MASK_M12 GENMASK(25, 24)
+#define VIF_MASK_M11 GENMASK(23, 22)
+#define VIF_MASK_M10 GENMASK(21, 20)
+#define VIF_MASK_M9  GENMASK(19, 18)
+#define VIF_MASK_M8  GENMASK(17, 16)
+#define VIF_MASK_M7  GENMASK(15, 14)
+#define VIF_MASK_M6  GENMASK(13, 12)
+#define VIF_MASK_M5  GENMASK(11, 10)
+#define VIF_MASK_M4  GENMASK(9, 8)
+#define VIF_MASK_M3  GENMASK(7, 6)
+#define VIF_MASK_M2  GENMASK(5, 4)
+#define VIF_MASK_M1  GENMASK(3, 2)
+#define VIF_MASK_M0  GENMASK(1, 0)
+
+/* VIF0/1_R_CODE Fields */
+#define VIF_CODE_CMD       GENMASK(31, 24)
+#define VIF_CODE_NUM       GENMASK(23, 16)
+#define VIF_CODE_IMMEDIATE GENMASK(15, 0)
+
+/* VIF0/1_R_ITOPS Fields */
+#define VIF_ITOPS_ITOPS GENMASK(9, 0)
+
+/* VIF1_R_BASE Fields */
+#define VIF1_BASE_BASE GENMASK(9, 0)
+
+/* VIF1_R_OFST Fields */
+#define VIF1_OFST_OFFSET GENMASK(9, 0)
+
+/* VIF1_R_TOPS Fields */
+#define VIF1_TOPS_TOPS GENMASK(9, 0)
+
+/* VIF0/1_R_NUM Fields */
+#define VIF_ITOP_ITOP GENMASK(9, 0)
+
+/* VIF1_R_TOP Fields */
+#define VIF1_TOP_TOP GENMASK(9, 0)
+
+#endif // VIF_REGS_H_
