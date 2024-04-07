@@ -35,6 +35,9 @@ static const char rcsid[] = "$Id: v_video.c,v 1.5 1997/02/03 22:45:13 b1 Exp $";
 
 byte screen_buf[SCREENWIDTH * SCREENHEIGHT * 5] __attribute__((aligned(128)));
 
+// special because we want to be able to directly load to the GS
+byte main_screen[512 * 256] __attribute__((aligned(128)));
+
 // Each screen is [SCREENWIDTH*SCREENHEIGHT];
 byte *screens[5];
 
@@ -383,12 +386,8 @@ void
 V_Init(void)
 {
 	int i;
-	byte *base;
-
-	// stick these in low dos memory on PCs
-
-	//base = I_AllocLow(SCREENWIDTH * SCREENHEIGHT * 4);
-
 	for (i = 0; i < 4; i++)
 		screens[i] = screen_buf + i * SCREENWIDTH * SCREENHEIGHT;
+
+	screens[0] = main_screen;
 }
