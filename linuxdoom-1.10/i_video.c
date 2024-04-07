@@ -380,18 +380,14 @@ DrawFrame(struct dmaList *list)
 	dmaCnt(list, 8 + 1, 0, 0);
 	dmaAddGIFtag(list, 8, 1, 1, GS_PRIM_SPRITE, GIF_PACKED, 1, GIF_PACKED_AD);
 
-	// dmaAddAD(list, GS_R_TEX0_1,
-	//   GS_SET_TEX0(screenStart, 512 / 64, GS_PSMT8, 9, 8, 0, GS_DECAL, clutStart, GS_PSMCT32, 0,
-	//   0,
-	//	1));
-
 	dmaAddAD(list, GS_R_TEX0_1,
-	  GS_SET_TEX0(clutStart, 512 / 64, GS_PSMCT32, 9, 8, 0, GS_DECAL, 0, 0, 0, 0, 1));
+	  GS_SET_TEX0(screenStart, 512 / 64, GS_PSMT8, 9, 8, 0, GS_DECAL, clutStart, GS_PSMCT32, 0, 0,
+		1));
 
-	// dmaAddAD(list, GS_R_TEX1_1, GS_SET_TEX1(1, 0, 1, 1, 0, 0, 0));
+	dmaAddAD(list, GS_R_TEX1_1, GS_SET_TEX1(0, 0, 1, 1, 0, 0, 0));
 
 	dmaAddAD(list, GS_R_PRMODE, GS_SET_PRMODE(0, 1, 0, 0, 0, 0, 0, 0));
-	dmaAddAD(list, GS_R_RGBAQ, GS_SET_RGBAQ(0x0, 0x0, 0x00, 0x0, 0));
+	dmaAddAD(list, GS_R_RGBAQ, GS_SET_RGBAQ(0x0, 0x0, 0x00, 0x80, 0));
 
 	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s1, *(uint32 *)&t1));
 	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ((x) << 4, (y) << 4, 0));
@@ -401,29 +397,11 @@ DrawFrame(struct dmaList *list)
 }
 
 void
-render_line(uint8 *src, uint8 *dest, uint32 width)
-{
-	while (width--) {
-		uint8 c = *src;
-		assert(dest < (fb + sizeof(fb)));
-
-		dest[0] = palbuf[c].r;
-		dest[1] = palbuf[c].g;
-		dest[2] = palbuf[c].b;
-		dest[3] = palbuf[c].a;
-
-		src++;
-		dest += 4;
-	}
-}
-
-void
 render(uint8 *src, uint8 *dest, uint32 src_width, uint32 src_height, uint32 dest_buffer_width)
 {
 	while (src_height--) {
-		// memcpy(dest, src, src_width);
-		render_line(src, dest, src_width);
-		dest += (dest_buffer_width * 4);
+		memcpy(dest, src, src_width);
+		dest += dest_buffer_width;
 		src += src_width;
 	}
 }
@@ -436,41 +414,29 @@ I_FinishUpdate(void)
 {
 	struct dmaList list;
 	static int f = 0;
-	static int once = false;
 
 	dmaStart(&list, gif_buffer, sizeof(gif_buffer));
 
 	SetDraw(&dma_buffers.draw[f], &list);
 	Clear(&list, 0x80, 0x0, 0x0);
 
-	// UploadFrame(&list);
-
 	render(screens[0], fb, SCREENWIDTH, SCREENHEIGHT, 512);
+	UploadImage(&list, fb, 512, 256, GS_PSMT8, screenStart);
 
 	if (pal_dirty) {
+		UploadImage(&list, palbuf, 16, 16, GS_PSMCT32, clutStart);
 		pal_dirty = false;
 	}
 
-	// UploadImage(&list, palbuf, 16, 16, GS_PSMCT32, clutStart);
-	//    UploadImage(&list, screens[0], SCREENWIDTH, SCREENHEIGHT, GS_PSMT8, screenStart);
-	// UploadImage(&list, screens[0], 512, 256, GS_PSMT8, screenStart);
-	UploadImage(&list, fb, 512, 256, GS_PSMCT32, clutStart);
-
-	if (!once) {
-		once = true;
-	}
-
 	DrawFrame(&list);
-	//      draw to framebuffer
-
 	dmaFinish(&list);
 
-	//dumpDma(list.start, 1);
+	// dumpDma(list.start, 1);
 	dmaSend(DMA_CHAN_GIF, &list);
 
 	dmaSyncPath();
 
-	graphWaitVSync();
+	// graphWaitVSync();
 
 	SetDisp(&dma_buffers.disp[f]);
 
@@ -492,16 +458,16 @@ I_ReadScreen(byte *scr)
 void
 I_SetPalette(byte *palette)
 {
-
 	byte *gamma = gammatable[usegamma];
 
-	// memcpy(palbuf, gamma, 256);
+#define clut_shuf(x) (((x) & ~0x18) | ((((x) & 0x08) << 1) | (((x) & 0x10) >> 1)))
 	for (int i = 0; i < 256; i++) {
-		palbuf[i].r = gamma[*palette++];
-		palbuf[i].g = gamma[*palette++];
-		palbuf[i].b = gamma[*palette++];
-		palbuf[i].a = 0;
+		palbuf[clut_shuf(i)].r = gamma[*palette++];
+		palbuf[clut_shuf(i)].g = gamma[*palette++];
+		palbuf[clut_shuf(i)].b = gamma[*palette++];
+		palbuf[clut_shuf(i)].a = 0;
 	}
+#undef clut_shuf
 
 	pal_dirty = true;
 }
@@ -565,10 +531,8 @@ InitBuffers(struct dmaBuffers *buffers, int width, int height, int psm, int zpsm
 	buffers->draw[1] = buffers->draw[0];
 	buffers->draw[1].frame1 |= fbp;
 	buffers->draw[1].frame2 |= fbp;
-	clutStart = gsAllocPtr / 4 / 64;
-	uint32 sz = (gsEnd - clutStart) / 2;
-	sz = (sz + 31) & ~31;
-	screenStart = clutStart + sz;
+	screenStart = gsAllocPtr / 4 / 64;
+	clutStart = gsEnd - 2;
 }
 
 void
