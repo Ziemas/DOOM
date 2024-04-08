@@ -20,15 +20,12 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char rcsid[] = "$Id: i_unix.c,v 1.5 1997/02/03 22:45:10 b1 Exp $";
-
+#include <fcntl.h>
 #include <math.h>
 #include <stdio.h>
+#include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/types.h>
-
-#include <fcntl.h>
-#include <sys/ioctl.h>
 #include <unistd.h>
 
 // Timer stuff. Experimental.
@@ -359,7 +356,6 @@ I_StartSound(int id, int vol, int sep, int pitch, int priority)
 void
 I_StopSound(int handle)
 {
-
 }
 
 int
@@ -372,7 +368,6 @@ void
 I_UpdateSound(void)
 {
 }
-
 
 void
 I_SubmitSound(void)

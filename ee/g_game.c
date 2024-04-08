@@ -19,8 +19,6 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char rcsid[] = "$Id: g_game.c,v 1.8 1997/02/03 22:45:09 b1 Exp $";
-
 #include "am_map.h"
 #include "d_main.h"
 #include "doomdef.h"
@@ -1435,11 +1433,11 @@ G_DoPlayDemo(void)
 
 	// skip version check
 	demo_p++;
-	//if (*demo_p++ != VERSION) {
+	// if (*demo_p++ != VERSION) {
 	//	fprintf(stderr, "Demo is from a different game version!\n");
 	//	gameaction = ga_nothing;
 	//	return;
-	//}
+	// }
 
 	skill = *demo_p++;
 	episode = *demo_p++;

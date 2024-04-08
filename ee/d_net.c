@@ -21,9 +21,6 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <stdint.h>
-static const char rcsid[] = "$Id: d_net.c,v 1.3 1997/02/03 22:01:47 b1 Exp $";
-
 #include "doomdef.h"
 #include "doomstat.h"
 #include "g_game.h"
@@ -31,6 +28,8 @@ static const char rcsid[] = "$Id: d_net.c,v 1.3 1997/02/03 22:01:47 b1 Exp $";
 #include "i_system.h"
 #include "i_video.h"
 #include "m_menu.h"
+
+#include <stdint.h>
 
 #define NCMD_EXIT 0x80000000
 #define NCMD_RETRANSMIT 0x40000000

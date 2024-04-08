@@ -20,15 +20,13 @@
 //
 //-----------------------------------------------------------------------------
 
-#include "gs_regs.h"
-#include "kernel.h"
-static const char rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
-
 #include "d_main.h"
 #include "doomdef.h"
 #include "i_system.h"
+#include "kernel.h"
 #include "ps2/dma.h"
 #include "ps2/graph.h"
+#include "ps2/gs_regs.h"
 #include "v_video.h"
 
 #include <stdbool.h>

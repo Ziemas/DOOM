@@ -22,21 +22,20 @@
 //
 //-----------------------------------------------------------------------------
 
-#include <stdint.h>
-static const char rcsid[] = "$Id: r_data.c,v 1.4 1997/02/03 16:47:55 b1 Exp $";
+#include "r_data.h"
 
 #include "doomdef.h"
 #include "doomstat.h"
 #include "i_system.h"
 #include "m_swap.h"
 #include "p_local.h"
-#include "r_data.h"
 #include "r_local.h"
 #include "r_sky.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
 #include <alloca.h>
+#include <stdint.h>
 
 //
 // Graphics.

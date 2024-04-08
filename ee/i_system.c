@@ -19,8 +19,6 @@
 //
 //-----------------------------------------------------------------------------
 
-static const char rcsid[] = "$Id: m_bbox.c,v 1.1 1997/02/03 22:45:10 b1 Exp $";
-
 #include "d_net.h"
 #include "doomdef.h"
 #include "g_game.h"
