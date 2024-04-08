@@ -509,12 +509,9 @@ IdentifyVersion(void)
 		buf[0] = '\0';
 	}
 
-	// sprintf(basedefault, "%s/.doomrc", p);
-	sprintf(wad, "%s/doom.wad", p);
-	// D_AddFile(wad);
+	sprintf(basedefault, "%s/.doomrc", p);
 
-	D_AddFile("host:/home/ziemas/ps2/DOOM/linuxdoom-1.10/doom.wad");
-	D_AddFile("doom.wad");
+	D_AddFile("host:/home/ziemas/ps2/doom/doom.wad");
 
 	gamemode = registered;
 
