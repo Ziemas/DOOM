@@ -375,8 +375,6 @@ DrawFrame(struct dmaList *list)
 	int x = 2048 - w / 2;
 	int y = 2048 - h / 2;
 
-	float s1 = 0.0f, t1 = 0.0f, s2 = 0.625f, t2 = 0.782f;
-
 	dmaCnt(list, 8 + 1, 0, 0);
 	dmaAddGIFtag(list, 8, 1, 1, GS_PRIM_SPRITE, GIF_PACKED, 1, GIF_PACKED_AD);
 
@@ -386,13 +384,13 @@ DrawFrame(struct dmaList *list)
 
 	dmaAddAD(list, GS_R_TEX1_1, GS_SET_TEX1(0, 0, 1, 1, 0, 0, 0));
 
-	dmaAddAD(list, GS_R_PRMODE, GS_SET_PRMODE(0, 1, 0, 0, 0, 0, 0, 0));
+	dmaAddAD(list, GS_R_PRMODE, GS_SET_PRMODE(0, 1, 0, 0, 0, 1, 0, 0));
 	dmaAddAD(list, GS_R_RGBAQ, GS_SET_RGBAQ(0x0, 0x0, 0x00, 0x80, 0));
 
-	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s1, *(uint32 *)&t1));
+	dmaAddAD(list, GS_R_UV, GS_SET_UV(0, 0));
 	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ((x) << 4, (y) << 4, 0));
 
-	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s2, *(uint32 *)&t2));
+	dmaAddAD(list, GS_R_UV, GS_SET_UV(330 << 4, 200 << 4));
 	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(((x + w)) << 4, ((y + h)) << 4, 0));
 }
 
