@@ -362,7 +362,7 @@ UploadImage(struct dmaList *list, void *image, int width, int height, int psm, i
 	}
 
 	dmaCnt(list, 2, 0, 0);
-	dmaAddGIFtag(list, 1, 0, 0, 0, GIF_PACKED, 1, GIF_PACKED_AD);
+	dmaAddGIFtag(list, 1, 1, 0, 0, GIF_PACKED, 1, GIF_PACKED_AD);
 	dmaAddAD(list, GS_R_TEXFLUSH, 0);
 }
 
