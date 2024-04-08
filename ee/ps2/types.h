@@ -16,11 +16,7 @@ static inline uint128
 MAKE128(uint64 msb, uint64 lsb)
 {
 	uint128 data;
-#ifndef _PS2SDK
-	__asm__("pcpyld %0, %1, %2" : "=r"(data) : "r"((uint64)(msb)), "r"((uint64)(lsb)));
-#else
 	data = (uint128)lsb | ((uint128)msb << 64);
-#endif
 	return data;
 }
 #define UINT64(HIGH, LOW) (((uint64)(uint32)(HIGH)) << 32 | ((uint64)(uint32)(LOW)))
