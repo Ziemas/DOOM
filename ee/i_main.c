@@ -22,13 +22,25 @@
 
 #include "d_main.h"
 #include "doomdef.h"
+#include "i_system.h"
 #include "m_argv.h"
+
+#include <loadfile.h>
+#include <sifrpc.h>
 
 int
 main(int argc, char **argv)
 {
+	int module;
+
 	myargc = argc;
 	myargv = argv;
+
+	SifInitRpc(0);
+	module = SifLoadModule("host:imp.irx", 0, NULL);
+	if (module < 0) {
+		I_Error("Failed to load IMP");
+	}
 
 	D_DoomMain();
 
