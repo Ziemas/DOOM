@@ -583,21 +583,5 @@ I_InitGraphics(void)
 	InitGsRegs(&list);
 	dmaFinish(&list);
 	dmaSend(DMA_CHAN_GIF, &list);
-
-	/*
-	dmaStart(&list, gif_buffer, sizeof(gif_buffer));
-	InitGsRegs(&list);
-	dmaFinish(&list);
-	dumpDma(list.start, 1);
-	dmaSend(DMA_CHAN_GIF, &list);
-
-	while (1) {
-		//dmaStart(&list, gif_buffer, sizeof(gif_buffer));
-		//dmaFinish(&list);
-		//dumpDma(list.start, 1);
-		//dmaSend(DMA_CHAN_GIF, &list);
-		dmaSyncPath();
-		graphWaitVSync();
-	}
-	*/
+	dmaSyncPath();
 }
