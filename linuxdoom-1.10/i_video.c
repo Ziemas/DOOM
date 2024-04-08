@@ -436,7 +436,7 @@ I_FinishUpdate(void)
 
 	dmaSyncPath();
 
-	// graphWaitVSync();
+	graphWaitVSync();
 
 	SetDisp(&dma_buffers.disp[f]);
 
