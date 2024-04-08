@@ -1,0 +1,7 @@
+TOP_DIR = $(TUP_CWD)
+import PS2SDK
+CFLAGS = -std=gnu99 -G0 -Og -g -fno-common -Wall -Werror-implicit-function-declaration
+INC = -I$(PS2SDK)/common/include
+
+!cc = |> $(CC) $(CFLAGS) $(INC) -c %f -o %o |> %B.o
+!ld = |> $(CC) %f -o %o $(LDFLAGS) |>
