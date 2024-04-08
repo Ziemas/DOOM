@@ -1,5 +1,25 @@
 #include <stdio.h>
+#include <thbase.h>
+#include <sifrpc.h>
+#include <sysmem.h>
+
+sysmem_IMPORTS_start
+I_AllocSysMemory
+sysmem_IMPORTS_end
 
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
+
+thbase_IMPORTS_start
+I_StartThread
+I_CreateThread
+I_GetThreadId
+thbase_IMPORTS_end
+
+sifcmd_IMPORTS_start
+I_sceSifInitRpc
+I_sceSifSetRpcQueue
+I_sceSifRegisterRpc
+I_sceSifRpcLoop
+sifcmd_IMPORTS_end
