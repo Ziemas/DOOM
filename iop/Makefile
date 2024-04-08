@@ -1,43 +1,33 @@
-TARGET=doom
+TARGET=imp
 
-TOOLCHAIN_PREFIX ?= mips64r5900el-ps2-elf-
+TOOLCHAIN_PREFIX ?= mipsel-ps2-irx-
 CC := $(TOOLCHAIN_PREFIX)gcc
 CXX := $(TOOLCHAIN_PREFIX)g++
 AS := $(TOOLCHAIN_PREFIX)as
 
-SRCDIRS := . ps2
+SRCDIRS := .
 OBJDIR := build
 
 CXXSRC := $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.cpp))
 CSRC := $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.c))
-VUSRC := $(foreach dir,$(SRCDIRS),$(wildcard $(dir)/*.dsm))
 
-CFLAGS := -D_EE -std=gnu99 -G0 -Og -g -fno-common -Wall -Werror-implicit-function-declaration
+CFLAGS := -D_IOP -D_PS2SDK -std=gnu99 -G0 -Og -g -fno-common -fno-builtin -Wall -Werror-implicit-function-declaration -msoft-float -mno-explicit-relocs
+LDFLAGS := -L$(PS2SDK)/iop/lib -nostdlib
 
 LIBS=
 
-OBJ := $(addprefix $(OBJDIR)/,$(CSRC:.c=.o) $(CXXSRC:.cpp=.o) $(VUSRC:.dsm=.o))
+OBJ := $(addprefix $(OBJDIR)/,$(CSRC:.c=.o) $(CXXSRC:.cpp=.o))
 DEP := $(addprefix $(OBJDIR)/,$(CSRC:.c=.d) $(CXXSRC:.cpp=.d))
 
 ASINC := $(addprefix -I,$(SRCDIRS))
-INC := $(addprefix -I,$(SRCDIRS))	\
-	-I$(PS2SDK)/common/include	    \
-	-I$(PS2SDK)/ee/include
+INC := $(addprefix -I,$(SRCDIRS)) -I$(PS2SDKSRC)/iop/kernel/include -I$(PS2SDKSRC)/common/include
 
-$(TARGET).elf: $(OBJ)
+$(TARGET).irx: $(OBJ)
 	echo $(OBJ)
-	$(CXX) -o $@ $(OBJ) $(LIBS) -T $(PS2SDK)/ee/startup/linkfile -L$(PS2SDK)/ee/lib
+	$(CXX) -o $@ $(OBJ) $(LIBS) $(LDFLAGS)
 
 clean:
 	rm -rf $(OBJ) $(TARGET) $(DEP)
-
-$(OBJDIR)/%.o: $(OBJDIR)/%.dsm_x
-	@mkdir -p $(@D)
-	dvp-as -alm=$(@:.o=.lst) $(ASINC) $< -o $@
-
-$(OBJDIR)/%.dsm_x: %.dsm
-	@mkdir -p $(@D)
-	sh joinvu $< | cpp $(ASINC) | grep -v '^#' > $@
 
 $(OBJDIR)/%.o: %.c
 	@mkdir -p $(@D)
