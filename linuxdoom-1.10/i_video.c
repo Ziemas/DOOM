@@ -531,8 +531,9 @@ InitBuffers(struct dmaBuffers *buffers, int width, int height, int psm, int zpsm
 	buffers->draw[1] = buffers->draw[0];
 	buffers->draw[1].frame1 |= fbp;
 	buffers->draw[1].frame2 |= fbp;
+
 	screenStart = gsAllocPtr / 4 / 64;
-	clutStart = gsEnd - 2;
+	clutStart = gsEnd - 10;
 }
 
 void
