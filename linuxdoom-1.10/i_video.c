@@ -22,6 +22,8 @@
 
 #include "gs_regs.h"
 #include "kernel.h"
+
+#include <stdlib.h>
 static const char rcsid[] = "$Id: i_x.c,v 1.6 1997/02/03 22:45:10 b1 Exp $";
 
 #include "d_main.h"
@@ -145,8 +147,8 @@ dumpDma(uint32 *packet, int data)
 		case 3:
 			indent(sp);
 			fun_printf("ref %p, %X\n", addr, qwc);
-			if (data)
-				dumpData(addr, qwc, sp);
+			// if (data)
+			//	dumpData(addr, qwc, sp);
 			next = packet + 4;
 			break;
 		case 4:
@@ -375,8 +377,32 @@ DrawFrame(struct dmaList *list)
 	int x = 2048 - w / 2;
 	int y = 2048 - h / 2;
 
-	float s1 = 0.0f, t1 = 0.0f, s2 = 0.625f, t2 = 0.782f;
+	// float s1 = 0.0f, t1 = 0.0f, s2 = 0.625f, t2 = 0.782f;
+	float s1 = 0.0f, t1 = 0.0f, s2 = 1.0f, t2 = 1.0f;
+	uint32 x1 = (x + 50) << 4, y1 = (y + 50) << 4, x2 = (x + w - 50) << 4, y2 = (y + h - 50) << 4;
 
+	dmaCnt(list, 13 + 1, 0, 0);
+	dmaAddGIFtag(list, 13, 1, 1, GS_PRIM_TRIFAN, GIF_PACKED, 1, GIF_PACKED_AD);
+
+	dmaAddAD(list, GS_R_TEXFLUSH, 0);
+	dmaAddAD(list, GS_R_TEX0_1,
+	  GS_SET_TEX0(screenStart, 512 / 64, GS_PSMT8, 9, 8, 0, GS_MODULATE, clutStart, GS_PSMCT32, 0,
+		0, 1));
+
+	dmaAddAD(list, GS_R_TEX1_1, GS_SET_TEX1(1, 0, 1, 1, 0, 0, 0));
+	dmaAddAD(list, GS_R_PRMODE, GS_SET_PRMODE(0, 1, 0, 0, 0, 0, 0, 0));
+	dmaAddAD(list, GS_R_RGBAQ, GS_SET_RGBAQ(0x80, 0x80, 0x80, 0x00, 0));
+
+	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s1, *(uint32 *)&t2));
+	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(x1, y2, 0));
+	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s1, *(uint32 *)&t1));
+	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(x1, y1, 0));
+	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s2, *(uint32 *)&t1));
+	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(x2, y1, 0));
+	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s2, *(uint32 *)&t2));
+	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(x2, y2, 0));
+
+	/*
 	dmaCnt(list, 8 + 1, 0, 0);
 	dmaAddGIFtag(list, 8, 1, 1, GS_PRIM_SPRITE, GIF_PACKED, 1, GIF_PACKED_AD);
 
@@ -384,21 +410,28 @@ DrawFrame(struct dmaList *list)
 	  GS_SET_TEX0(screenStart, 512 / 64, GS_PSMT8, 9, 8, 0, GS_DECAL, clutStart, GS_PSMCT32, 0, 0,
 		1));
 
-	dmaAddAD(list, GS_R_TEX1_1, GS_SET_TEX1(0, 0, 1, 1, 0, 0, 0));
+	dmaAddAD(list, GS_R_TEX1_1, GS_SET_TEX1(1, 0, 1, 1, 0, 0, 0));
 
 	dmaAddAD(list, GS_R_PRMODE, GS_SET_PRMODE(0, 1, 0, 0, 0, 0, 0, 0));
 	dmaAddAD(list, GS_R_RGBAQ, GS_SET_RGBAQ(0x0, 0x0, 0x00, 0x80, 0));
 
 	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s1, *(uint32 *)&t1));
-	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ((x) << 4, (y) << 4, 0));
+	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ((x + 30) << 4, (y + 30) << 4, 0));
 
 	dmaAddAD(list, GS_R_ST, GS_SET_ST(*(uint32 *)&s2, *(uint32 *)&t2));
-	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(((x + w)) << 4, ((y + h)) << 4, 0));
+	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(((x + w) - 30) << 4, ((y + h) - 30) << 4, 0));
+	*/
 }
 
 void
 render(uint8 *src, uint8 *dest, uint32 src_width, uint32 src_height, uint32 dest_buffer_width)
 {
+	for (int i = 0; i < 512 * 256; i++) {
+		fb[i] = rand() % 256;
+	}
+
+	return;
+
 	while (src_height--) {
 		memcpy(dest, src, src_width);
 		dest += dest_buffer_width;
