@@ -276,7 +276,7 @@ SetDisp(struct dmaDispBuffer *disp)
 	write64(GS_R_DISPLAY1, disp->display1);
 	write64(GS_R_DISPFB2, disp->dispfb2);
 	write64(GS_R_DISPLAY2, disp->display2);
-	write32(GS_R_BGCOLOR, disp->bgcolor);
+	write64(GS_R_BGCOLOR, disp->bgcolor);
 }
 
 static inline void
