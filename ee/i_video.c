@@ -78,7 +78,10 @@ struct dmaBuffers {
 };
 
 struct dmaBuffers dma_buffers;
-uint128 gif_buffer[16 * 1024] __attribute__((aligned(128)));
+// uint128 gif_buffer[16 * 1024] __attribute__((aligned(128)));
+static uint128 *const gif_buffer = (uint128 *)0x70000000;
+#define SP_SIZE (1024 * 16)
+
 bool pal_dirty = false;
 
 #define fun_printf printf
@@ -507,7 +510,7 @@ I_FinishUpdate(void)
 	struct dmaList list;
 	static int f = 0;
 
-	dmaStart(&list, gif_buffer, sizeof(gif_buffer));
+	dmaStart(&list, gif_buffer, SP_SIZE);
 
 	SetDraw(&dma_buffers.draw[f], &list);
 	Clear(&list, 0x80, 0x0, 0x0);
@@ -672,7 +675,7 @@ I_InitGraphics(void)
 	dmaInit();
 	graphReset(GS_INTERLACE, GS_MODE_NTSC, GS_FIELD);
 	InitBuffers(&dma_buffers, OUTPUT_WIDTH, OUTPUT_HEIGHT, GS_PSMCT32, GS_PSMZ24);
-	dmaStart(&list, gif_buffer, sizeof(gif_buffer));
+	dmaStart(&list, gif_buffer, SP_SIZE);
 	InitGsRegs(&list);
 	dmaFinish(&list);
 	dmaSend(DMA_CHAN_GIF, &list);
