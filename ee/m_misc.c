@@ -231,7 +231,7 @@ default_t defaults[] = { { "mouse_sensitivity", &mouseSensitivity, 5 },
 	{ "use_joystick", &usejoystick, 0 }, { "joyb_fire", &joybfire, 0 },
 	{ "joyb_strafe", &joybstrafe, 1 }, { "joyb_use", &joybuse, 3 }, { "joyb_speed", &joybspeed, 2 },
 
-	{ "screenblocks", &screenblocks, 9 }, { "detaillevel", &detailLevel, 0 },
+	{ "screenblocks", &screenblocks, 10 }, { "detaillevel", &detailLevel, 0 },
 
 	{ "snd_channels", &numChannels, 3 },
 
