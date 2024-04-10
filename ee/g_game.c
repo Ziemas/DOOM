@@ -178,6 +178,8 @@ int dclicks2;
 // joystick values are repeated
 int joyxmove;
 int joyymove;
+int joy2xmove;
+int joy2ymove;
 boolean joyarray[5];
 boolean *joybuttons = &joyarray[1]; // allow [-1]
 
@@ -254,19 +256,10 @@ G_BuildTiccmd(ticcmd_t *cmd)
 			//	fprintf(stderr, "strafe left\n");
 			side -= sidemove[speed];
 		}
-		if (joyxmove > 0)
-			side += sidemove[speed];
-		if (joyxmove < 0)
-			side -= sidemove[speed];
-
 	} else {
 		if (gamekeydown[key_right])
 			cmd->angleturn -= angleturn[tspeed];
 		if (gamekeydown[key_left])
-			cmd->angleturn += angleturn[tspeed];
-		if (joyxmove > 0)
-			cmd->angleturn -= angleturn[tspeed];
-		if (joyxmove < 0)
 			cmd->angleturn += angleturn[tspeed];
 	}
 
@@ -278,10 +271,22 @@ G_BuildTiccmd(ticcmd_t *cmd)
 		// fprintf(stderr, "down\n");
 		forward -= forwardmove[speed];
 	}
+
 	if (joyymove < 0)
 		forward += forwardmove[speed];
 	if (joyymove > 0)
 		forward -= forwardmove[speed];
+
+	if (joyxmove > 0)
+		side += sidemove[speed];
+	if (joyxmove < 0)
+		side -= sidemove[speed];
+
+	if (joy2xmove > 0)
+		cmd->angleturn -= angleturn[tspeed];
+	if (joy2xmove < 0)
+		cmd->angleturn += angleturn[tspeed];
+
 	if (gamekeydown[key_straferight])
 		side += sidemove[speed];
 	if (gamekeydown[key_strafeleft])
@@ -518,6 +523,8 @@ G_Responder(event_t *ev)
 		joybuttons[3] = ev->data1 & 8;
 		joyxmove = ev->data2;
 		joyymove = ev->data3;
+		joy2xmove = ev->data4;
+		joy2ymove = ev->data5;
 		return true; // eat events
 
 	default:

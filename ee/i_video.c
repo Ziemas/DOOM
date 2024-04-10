@@ -292,33 +292,56 @@ test_send_key(int button_bit, int key)
 	}
 }
 
+static int
+check_button(int button)
+{
+	if (buttons[0].btns & button) {
+		return 0;
+	} else {
+		return 1;
+	}
+}
+
 void
 I_GetEvent(void)
 {
 	event_t event = {};
 
-	//if (padGetState(0, 0) != 6) {
-	//	return;
-	//}
-
-	if (do_pad_init) {
-		padSetMainMode(0, 0, PAD_MMODE_DUALSHOCK, PAD_MMODE_UNLOCK);
-		do_pad_init = false;
+	if (run_pad_state()) {
+		return;
 	}
 
-	padRead(0, 0, &buttons[0]);
+	test_send_key(PAD_LEFT, KEY_LEFTARROW);
+	test_send_key(PAD_RIGHT, KEY_RIGHTARROW);
+	test_send_key(PAD_UP, KEY_UPARROW);
+	test_send_key(PAD_DOWN, KEY_DOWNARROW);
+	test_send_key(PAD_CROSS, KEY_ENTER);
+	test_send_key(PAD_SQUARE, KEY_BACKSPACE);
+	// test_send_key(PAD_TRIANGLE, KEY_ESCAPE);
+	test_send_key(PAD_START, KEY_PAUSE);
 
-	test_button(PAD_LEFT, KEY_LEFTARROW);
-	test_button(PAD_RIGHT, KEY_RIGHTARROW);
-	test_button(PAD_UP, KEY_UPARROW);
-	test_button(PAD_DOWN, KEY_DOWNARROW);
-	test_button(PAD_CROSS, KEY_ENTER);
-	test_button(PAD_R2, KEY_RCTRL);
-	test_button(PAD_SQUARE, KEY_BACKSPACE);
-	test_button(PAD_TRIANGLE, KEY_ESCAPE);
-	test_button(PAD_START, KEY_PAUSE);
+	// test_send_key(PAD_R2, KEY_RCTRL);
 
-	buttons[1] = buttons[0];
+	event.type = ev_joystick;
+	event.data1 = (check_button(PAD_R2) << 0) | (check_button(PAD_SQUARE) << 1) |
+	  (check_button(PAD_L1) << 2) | (check_button(PAD_CROSS) << 3);
+
+	if ((buttons[0].ljoy_h <= 50) || (buttons[0].ljoy_h >= 200)) {
+		event.data2 = buttons[0].ljoy_h - 127;
+	}
+	if ((buttons[0].ljoy_v <= 50) || (buttons[0].ljoy_v >= 200)) {
+		event.data3 = buttons[0].ljoy_v - 127;
+	}
+
+	if ((buttons[0].rjoy_h <= 50) || (buttons[0].rjoy_h >= 200)) {
+		event.data4 = buttons[0].rjoy_h - 127;
+	}
+	if ((buttons[0].rjoy_v <= 50) || (buttons[0].rjoy_v >= 200)) {
+		event.data5 = buttons[0].rjoy_v - 127;
+	}
+
+	// printf("%d:%d\n", buttons[0].ljoy_h, buttons[0].ljoy_v);
+	D_PostEvent(&event);
 }
 
 //

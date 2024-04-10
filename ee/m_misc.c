@@ -204,36 +204,10 @@ default_t defaults[] = { { "mouse_sensitivity", &mouseSensitivity, 5 },
 	{ "sfx_volume", &snd_SfxVolume, 8 }, { "music_volume", &snd_MusicVolume, 8 },
 	{ "show_messages", &showMessages, 1 },
 
-
-	{ "key_right", &key_right, KEY_RIGHTARROW }, { "key_left", &key_left, KEY_LEFTARROW },
-	{ "key_up", &key_up, KEY_UPARROW }, { "key_down", &key_down, KEY_DOWNARROW },
-	{ "key_fire", &key_fire, KEY_RCTRL }, { "key_use", &key_use, KEY_ENTER },
-
-#ifdef NORMALUNIX
-	{ "key_right", &key_right, KEY_RIGHTARROW }, { "key_left", &key_left, KEY_LEFTARROW },
-	{ "key_up", &key_up, KEY_UPARROW }, { "key_down", &key_down, KEY_DOWNARROW },
-	{ "key_strafeleft", &key_strafeleft, ',' }, { "key_straferight", &key_straferight, '.' },
-
-	{ "key_fire", &key_fire, KEY_RCTRL }, { "key_use", &key_use, ' ' },
-	{ "key_strafe", &key_strafe, KEY_RALT }, { "key_speed", &key_speed, KEY_RSHIFT },
-
-// UNIX hack, to be removed.
-#ifdef SNDSERV
-	{ "sndserver", (int *)&sndserver_filename, (uintptr_t) "sndserver" },
-	{ "mb_used", &mb_used, 2 },
-#endif
-
-#endif
-
-#ifdef LINUX
-	{ "mousedev", (int *)&mousedev, (uintptr_t) "/dev/ttyS0" },
-	{ "mousetype", (int *)&mousetype, (uintptr_t) "microsoft" },
-#endif
-
 	{ "use_mouse", &usemouse, 1 }, { "mouseb_fire", &mousebfire, 0 },
 	{ "mouseb_strafe", &mousebstrafe, 1 }, { "mouseb_forward", &mousebforward, 2 },
 
-	{ "use_joystick", &usejoystick, 0 }, { "joyb_fire", &joybfire, 0 },
+	{ "use_joystick", &usejoystick, 1 }, { "joyb_fire", &joybfire, 0 },
 	{ "joyb_strafe", &joybstrafe, 1 }, { "joyb_use", &joybuse, 3 }, { "joyb_speed", &joybspeed, 2 },
 
 	{ "screenblocks", &screenblocks, 10 }, { "detaillevel", &detailLevel, 0 },
