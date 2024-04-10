@@ -208,10 +208,77 @@ I_StartFrame(void)
 
 static char pad_data[256 * 2] __attribute__((aligned(64)));
 static struct padButtonStatus buttons[2];
-static bool do_pad_init;
+static int pad_state;
+
+static int
+run_pad_state()
+{
+	int status = padGetState(0, 0);
+	int id, exid;
+
+	if (status == PAD_STATE_DISCONN) {
+		pad_state = 0;
+	}
+
+	switch (pad_state) {
+	case 0:
+		if (status != PAD_STATE_STABLE && status != PAD_STATE_FINDCTP1) {
+			break;
+		}
+
+		id = padInfoMode(0, 0, PAD_MODECURID, 0);
+		if (id == 0) {
+			break;
+		}
+		exid = padInfoMode(0, 0, PAD_MODECUREXID, 0);
+		if (exid > 0) {
+			id = exid;
+		}
+
+		if (id == PAD_TYPE_DUALSHOCK) {
+			pad_state = 3;
+			break;
+		}
+
+		if (id == PAD_TYPE_DIGITAL) {
+			pad_state = 1;
+			break;
+		}
+		break;
+	case 1:
+		// Digital only
+		if (padInfoMode(0, 0, PAD_MODECUREXID, 0) == 0) {
+			pad_state = 4;
+			break;
+		}
+
+		if (padSetMainMode(0, 0, 1, 0) == 1) {
+			pad_state = 2;
+		}
+		break;
+	case 2:
+		if (padGetReqState(0, 0) == PAD_RSTAT_FAILED) {
+			pad_state = 1;
+		}
+		if (padGetReqState(0, 0) == PAD_RSTAT_COMPLETE) {
+			pad_state = 0;
+		}
+		break;
+	case 3:
+		if (status == PAD_STATE_STABLE || status == PAD_STATE_FINDCTP1) {
+			buttons[1] = buttons[0];
+			padRead(0, 0, &buttons[0]);
+		}
+		return 0;
+	default:
+		break;
+	}
+
+	return 1;
+};
 
 static void
-test_button(int button_bit, int key)
+test_send_key(int button_bit, int key)
 {
 	event_t event;
 	int prev = buttons[1].btns & button_bit;
@@ -590,5 +657,5 @@ I_InitGraphics(void)
 
 	padInit(0);
 	padPortOpen(0, 0, pad_data);
-	do_pad_init = true;
+	pad_state = 0;
 }
