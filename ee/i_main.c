@@ -26,11 +26,15 @@
 #include "m_argv.h"
 
 #include <loadfile.h>
+#include <sbv_patches.h>
 #include <sifrpc.h>
 #include <unistd.h>
 
 extern unsigned int size_libsd_data;
 extern unsigned int libsd_data[];
+
+extern unsigned int size_padman_data;
+extern unsigned int padman_data[];
 
 extern unsigned int size_usbd_data;
 extern unsigned int usbd_data[];
@@ -44,6 +48,9 @@ extern unsigned int bdmfs_fatfs_data[];
 extern unsigned int size_usbmass_bd_data;
 extern unsigned int usbmass_bd_data[];
 
+extern unsigned int size_sio2man_data;
+extern unsigned int sio2man_data[];
+
 int
 main(int argc, char **argv)
 {
@@ -53,6 +60,9 @@ main(int argc, char **argv)
 	myargv = argv;
 
 	SifInitRpc(0);
+
+	sbv_patch_enable_lmb();
+	sbv_patch_disable_prefix_check();
 
 	module = SifExecModuleBuffer(libsd_data, size_libsd_data, 0, NULL, NULL);
 	if (module < 0) {
@@ -78,6 +88,21 @@ main(int argc, char **argv)
 	if (module < 0) {
 		I_Error("Failed to load usbmass");
 	}
+
+	module = SifExecModuleBuffer(sio2man_data, size_sio2man_data, 0, NULL, NULL);
+	if (module < 0) {
+		I_Error("Failed to load sio2man");
+	}
+
+	module = SifExecModuleBuffer(padman_data, size_padman_data, 0, NULL, NULL);
+	if (module < 0) {
+		I_Error("Failed to load padman");
+	}
+
+	// module = SifLoadModule("rom:PADMAN", 0, NULL);
+	// if (module < 0) {
+	//	I_Error("Failed to load padman");
+	// }
 
 	module = SifLoadModule("host:imp.irx", 0, NULL);
 	if (module < 0) {

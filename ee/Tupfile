@@ -5,10 +5,11 @@ CFLAGS += -D_EE
 LDFLAGS = -T $(PS2SDK)/ee/startup/linkfile -L$(PS2SDK)/ee/lib
 INC += -I$(PS2SDK)/ee/include
 OUT = $(TOP_DIR)/doom.elf
+LIBS = -lpad -lpatches
 
 IRX_DIR = $(PS2SDK)/iop/irx
 IRXS += $(IRX_DIR)/usbd.irx $(IRX_DIR)/usbmass_bd.irx $(IRX_DIR)/bdmfs_fatfs.irx \
-        $(IRX_DIR)/bdm.irx $(IRX_DIR)/libsd.irx
+        $(IRX_DIR)/bdm.irx $(IRX_DIR)/libsd.irx $(IRX_DIR)/sio2man.irx $(IRX_DIR)/padman.irx
 
 
 # sad, hope i can figure something out

@@ -501,6 +501,7 @@ D_AddFile(char *file)
 void
 IdentifyVersion(void)
 {
+	sprintf(basedefault, "%s/.doomrc", "mass:");
 	D_AddFile("mass:doom.wad");
 	D_AddFile("doom.wad");
 

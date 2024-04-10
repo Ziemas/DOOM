@@ -23,12 +23,13 @@
 #include "d_main.h"
 #include "doomdef.h"
 #include "i_system.h"
-#include "kernel.h"
 #include "ps2/dma.h"
 #include "ps2/graph.h"
 #include "ps2/gs_regs.h"
 #include "v_video.h"
 
+#include <kernel.h>
+#include <libpad.h>
 #include <stdbool.h>
 
 #define OUTPUT_WIDTH 640
@@ -205,47 +206,52 @@ I_StartFrame(void)
 	// er?
 }
 
-static int TranslateKey(/*SDL_KeyboardEvent key*/)
-{
-	int c;
-	/*
-	switch (key.keysym.sym) {
-	case SDLK_UP:
-		c = KEY_UPARROW;
-		break;
-	case SDLK_DOWN:
-		c = KEY_DOWNARROW;
-		break;
-	case SDLK_LEFT:
-		c = KEY_LEFTARROW;
-		break;
-	case SDLK_RIGHT:
-		c = KEY_RIGHTARROW;
-		break;
-	case SDLK_LCTRL:
-	case SDLK_RCTRL:
-		c = KEY_RCTRL;
-		break;
-	case SDLK_LALT:
-	case SDLK_RALT:
-		c = KEY_RALT;
-		break;
-	case SDLK_LSHIFT:
-	case SDLK_RSHIFT:
-		c = KEY_RSHIFT;
-		break;
-	default:
-		c = key.keysym.sym;
-		break;
-	}
-	*/
+static char pad_data[256 * 2] __attribute__((aligned(64)));
+static struct padButtonStatus buttons[2];
+static bool do_pad_init;
 
-	return c;
+static void
+test_button(int button_bit, int key)
+{
+	event_t event;
+	int prev = buttons[1].btns & button_bit;
+	int cur = buttons[0].btns & button_bit;
+	int type = cur ? ev_keyup : ev_keydown;
+
+	if (cur != prev) {
+		event.type = type;
+		event.data1 = key;
+		D_PostEvent(&event);
+	}
 }
 
 void
 I_GetEvent(void)
 {
+	event_t event = {};
+
+	//if (padGetState(0, 0) != 6) {
+	//	return;
+	//}
+
+	if (do_pad_init) {
+		padSetMainMode(0, 0, PAD_MMODE_DUALSHOCK, PAD_MMODE_UNLOCK);
+		do_pad_init = false;
+	}
+
+	padRead(0, 0, &buttons[0]);
+
+	test_button(PAD_LEFT, KEY_LEFTARROW);
+	test_button(PAD_RIGHT, KEY_RIGHTARROW);
+	test_button(PAD_UP, KEY_UPARROW);
+	test_button(PAD_DOWN, KEY_DOWNARROW);
+	test_button(PAD_CROSS, KEY_ENTER);
+	test_button(PAD_R2, KEY_RCTRL);
+	test_button(PAD_SQUARE, KEY_BACKSPACE);
+	test_button(PAD_TRIANGLE, KEY_ESCAPE);
+	test_button(PAD_START, KEY_PAUSE);
+
+	buttons[1] = buttons[0];
 }
 
 //
@@ -572,6 +578,7 @@ void
 I_InitGraphics(void)
 {
 	struct dmaList list;
+
 	dmaInit();
 	graphReset(GS_INTERLACE, GS_MODE_NTSC, GS_FIELD);
 	InitBuffers(&dma_buffers, OUTPUT_WIDTH, OUTPUT_HEIGHT, GS_PSMCT32, GS_PSMZ24);
@@ -580,4 +587,8 @@ I_InitGraphics(void)
 	dmaFinish(&list);
 	dmaSend(DMA_CHAN_GIF, &list);
 	dmaSyncPath();
+
+	padInit(0);
+	padPortOpen(0, 0, pad_data);
+	do_pad_init = true;
 }
