@@ -8,4 +8,4 @@ OUT = $(TOP_DIR)/imp.irx
 
 : foreach *.c |> !cc |>
 : imports.lst |> !cc -fno-toplevel-reorder |>
-: *.o |> !ld |> $(OUT)
+: *.o |> !ld |> $(OUT) ../<imp>

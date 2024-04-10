@@ -3,5 +3,6 @@ import PS2SDK
 CFLAGS = -std=gnu99 -G0 -Og -g -fno-exceptions -fno-common -Wall -Werror-implicit-function-declaration -fdiagnostics-color=always
 INC = -I$(PS2SDK)/common/include -I$(TOP_DIR)/common
 
+!b2c = |> bin2c %f %o %B_data |> %b.c
 !cc = |> ^j^ $(CC) $(CFLAGS) $(INC) -x c -c %f -o %o |> %B.o
 !ld = |> $(CC) %f -o %o $(LDFLAGS) |>

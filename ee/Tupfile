@@ -6,6 +6,15 @@ LDFLAGS = -T $(PS2SDK)/ee/startup/linkfile -L$(PS2SDK)/ee/lib
 INC += -I$(PS2SDK)/ee/include
 OUT = $(TOP_DIR)/doom.elf
 
+IRX_DIR = $(PS2SDK)/iop/irx
+IRXS += $(IRX_DIR)/usbd.irx $(IRX_DIR)/usbmass_bd.irx $(IRX_DIR)/bdmfs_fatfs.irx \
+        $(IRX_DIR)/bdm.irx $(IRX_DIR)/libsd.irx
+
+
+# sad, hope i can figure something out
+#: ../<imp> |> bin2c %<imp> %o %<imp>_data |> %b.c
+#: ../imp.irx | ../<imp> |> !b2c |>
+: foreach $(IRXS) |> !b2c |>
 : foreach *.c |> !cc |>
 : foreach ps2/*.c |> !cc |>
 : *.o |> !ld |> $(OUT)

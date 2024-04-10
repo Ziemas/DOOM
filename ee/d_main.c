@@ -501,17 +501,8 @@ D_AddFile(char *file)
 void
 IdentifyVersion(void)
 {
-	char buf[128];
-	char wad[128];
-	char *p = getcwd(buf, sizeof(buf));
-
-	if (!p) {
-		buf[0] = '\0';
-	}
-
-	sprintf(basedefault, "%s/.doomrc", p);
-
-	D_AddFile("host:/home/ziemas/ps2/doom/doom.wad");
+	D_AddFile("mass:doom.wad");
+	D_AddFile("doom.wad");
 
 	gamemode = registered;
 
