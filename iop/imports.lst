@@ -2,19 +2,45 @@
 #include <thbase.h>
 #include <sifrpc.h>
 #include <sysmem.h>
+#include <sysclib.h>
+#include <ioman.h>
+#include <libsd.h>
 
 sysmem_IMPORTS_start
 I_AllocSysMemory
 sysmem_IMPORTS_end
 
+sysclib_IMPORTS_start
+I_memcmp
+I_sprintf
+sysclib_IMPORTS_end
+
+libsd_IMPORTS_start
+I_sceSdInit
+I_sceSdVoiceTrans
+I_sceSdVoiceTransStatus
+I_sceSdSetParam
+I_sceSdSetSwitch
+I_sceSdSetAddr
+libsd_IMPORTS_end
+
 stdio_IMPORTS_start
 I_printf
 stdio_IMPORTS_end
+
+ioman_IMPORTS_start
+I_open
+I_read
+I_write
+I_lseek
+ioman_IMPORTS_end
 
 thbase_IMPORTS_start
 I_StartThread
 I_CreateThread
 I_GetThreadId
+I_USec2SysClock
+I_SetAlarm
 thbase_IMPORTS_end
 
 sifcmd_IMPORTS_start

@@ -99,11 +99,6 @@ main(int argc, char **argv)
 		I_Error("Failed to load padman");
 	}
 
-	// module = SifLoadModule("rom:PADMAN", 0, NULL);
-	// if (module < 0) {
-	//	I_Error("Failed to load padman");
-	// }
-
 	module = SifLoadModule("host:imp.irx", 0, NULL);
 	if (module < 0) {
 		I_Error("Failed to load IMP");

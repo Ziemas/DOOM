@@ -1,5 +1,9 @@
 #include "imp.h"
 
+#include "sound.h"
+#include "wad.h"
+
+#include <libsd.h>
 #include <sifrpc.h>
 #include <stddef.h>
 #include <stdio.h>
@@ -53,10 +57,14 @@ _start()
 {
 	iop_thread_t param;
 
-	messageBuffer = AllocSysMemory(0, 0x1000, 0);
-	returnBuffer = AllocSysMemory(0, 0x420, 0);
+	if (sceSdInit(0) < 0) {
+		printf("SD INIT FAILED");
+		return 0;
+	}
 
-	printf("imp hello\n");
+	messageBuffer = AllocSysMemory(ALLOC_FIRST, 0x1000, NULL);
+	returnBuffer = AllocSysMemory(ALLOC_FIRST, 0x420, NULL);
+
 	param.attr = TH_C;
 	param.thread = (void (*)(void *))imp_RpcThread;
 	param.priority = 0x3a;
@@ -69,6 +77,10 @@ _start()
 	}
 
 	StartThread(rpcThreadId, 0);
+
+	imp_IdentifyVersion();
+
+	imp_InitSound();
 
 	return 0;
 }
