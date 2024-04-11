@@ -26,6 +26,8 @@
 // SoundFX struct.
 //
 
+#include "types.h"
+
 struct sfxinfo {
 	// up to 6-character name
 	char *name;
@@ -46,7 +48,7 @@ struct sfxinfo {
 	int volume;
 
 	// sound data
-	void *data;
+	unsigned spu_addr;
 
 	// this is checked every second to see if sound
 	// can be thrown out (if 0, then decrement, if -1,
@@ -54,7 +56,9 @@ struct sfxinfo {
 	int usefulness;
 
 	// lump number of sfx
-	int lumpnum;
+	// int lumpnum;
+
+	u16 spu_pitch;
 };
 
 //

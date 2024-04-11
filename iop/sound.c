@@ -18,7 +18,7 @@
 
 u8 buf[MAX_SOUND_SIZE];
 s16 pcm[MAX_SOUND_SIZE];
-u8 adpcm[MAX_SOUND_SIZE] __attribute__((aligned(32)));
+u8 adpcm[2][MAX_SOUND_SIZE] __attribute__((aligned(32)));
 
 static s16 channel = 0;
 static s16 voice = 0;
@@ -50,42 +50,22 @@ pcm8to16(u8 *src, s16 *dest, u32 size)
 	}
 }
 
-static unsigned int
-set_kon(void *)
-{
-	static int phase = 0;
-	iop_sys_clock_t clock = { 0 };
-	USec2SysClock(1000000, &clock);
-
-	u32 kon = (1 << voice);
-
-	if (phase) {
-		sceSdSetSwitch(channel | SD_SWITCH_KON, kon);
-	} else {
-		sceSdSetSwitch(channel | SD_SWITCH_KOFF, kon);
-	}
-
-	phase = !phase;
-
-	return clock.lo;
-}
-
 int
 imp_EncodeSounds()
 {
 	struct lumphandle lump;
-	char name[8];
+	struct sfxinfo *sfx;
+	char name[9];
+	int buf_idx = 0;
 	int i;
 
 	for (i = 0; i < NUMSFX; i++) {
-		sprintf(name, "ds%.6s", S_sfx[i].name);
+		sfx = &S_sfx[i];
+
+		sprintf(name, "ds%.6s", sfx->name);
 		if (!imp_FindLump(name, &lump)) {
 			continue;
 		}
-
-		printf("found lump for %s!\n", name);
-		printf("size %d\n", lump.size);
-		printf("pos %d\n", lump.position);
 
 		if (lump.size > MAX_SOUND_SIZE) {
 			printf("maximum sound size exceeded, bump up the limit!\n");
@@ -98,27 +78,25 @@ imp_EncodeSounds()
 		pcm8to16(&hdr->samples[0], pcm, hdr->sample_count);
 		u32 count = hdr->sample_count - SAMPLE_PAD;
 
-		u32 err = sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
+		int adp_len = psx_audio_spu_encode_simple(pcm, count, adpcm[buf_idx], -1);
+
+		u32 err = sceSdVoiceTransStatus(buf_idx, SPU_WAIT_FOR_TRANSFER);
 		if (err < 0) {
 			printf("failed to wait for transfer %d", err);
 		}
 
-		int adp_len = psx_audio_spu_encode_simple(pcm, count, adpcm, -1);
-
-		u32 trans = sceSdVoiceTrans(1, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, adpcm, (u32 *)spu_alloc,
-		  adp_len);
+		u32 trans = sceSdVoiceTrans(buf_idx, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, adpcm[buf_idx],
+		  (u32 *)spu_alloc, adp_len);
 		if (trans < 0) {
 			printf("Bad transfer\n");
 			return -1;
 		}
 
-		spu_alloc += adp_len;
-		printf("spu loc is 0x%08x\n", spu_alloc >> 1);
-	}
+		sfx->spu_addr = spu_alloc;
+		sfx->spu_pitch = rate_to_pitch(hdr->rate);
 
-	u32 err = sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
-	if (err < 0) {
-		printf("failed to wait for transfer %d", err);
+		spu_alloc += adp_len;
+		buf_idx = !buf_idx;
 	}
 
 	return 0;
