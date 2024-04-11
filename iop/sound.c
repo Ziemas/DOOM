@@ -13,11 +13,17 @@
 
 #define SPU_WAIT_FOR_TRANSFER 1
 
-#define MAX_SOUND_SIZE 1024 * 16
+#define MAX_SOUND_SIZE 1024 * 48
+#define SPU_BASE 0x5010
 
 u8 buf[MAX_SOUND_SIZE];
 s16 pcm[MAX_SOUND_SIZE];
 u8 adpcm[MAX_SOUND_SIZE] __attribute__((aligned(32)));
+
+static s16 channel = 0;
+static s16 voice = 0;
+
+static u32 spu_alloc;
 
 #define SAMPLE_PAD 16
 struct sound_header {
@@ -27,41 +33,6 @@ struct sound_header {
 	u8 pad[16];
 	u8 samples[0];
 };
-
-s16 channel = 0;
-s16 voice = 0;
-#define SPU_DST (0x3800 << 1)
-
-static void
-initRegs()
-{
-	sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLR, 0x3fff);
-	sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_VOLL, 0x3fff);
-	sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, 0x1000);
-	sceSdSetParam(SD_VOICE(channel, (voice)) | SD_VPARAM_ADSR1,
-	  SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0x7f, 0xf));
-	sceSdSetParam(SD_VOICE(channel, (voice)) | SD_VPARAM_ADSR2,
-	  SD_SET_ADSR2(SD_ADSR_SR_EXPi, 0x7f, SD_ADSR_RR_LINEARd, 0x10));
-
-	sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLR, 0x3fff);
-	sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_VOLL, 0x3fff);
-	sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_PITCH, 0x1000);
-	sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_ADSR1,
-	  SD_SET_ADSR1(SD_ADSR_AR_EXPi, 0, 0x7f, 0xf));
-	sceSdSetParam(SD_VOICE(channel, (voice + 1)) | SD_VPARAM_ADSR2,
-	  SD_SET_ADSR2(SD_ADSR_SR_EXPi, 0x7f, SD_ADSR_RR_LINEARd, 0x10));
-
-	sceSdSetParam(0 | SD_PARAM_MMIX, 0xffff);
-	sceSdSetParam(1 | SD_PARAM_MMIX, 0xffff);
-	sceSdSetSwitch(channel | SD_SWITCH_VMIXL, 0xffff);
-	sceSdSetSwitch(channel | SD_SWITCH_VMIXR, 0xffff);
-	sceSdSetParam(0 | SD_PARAM_MVOLL, 0x3fff);
-	sceSdSetParam(0 | SD_PARAM_MVOLR, 0x3fff);
-	sceSdSetParam(1 | SD_PARAM_AVOLL, 0x3fff);
-	sceSdSetParam(1 | SD_PARAM_AVOLR, 0x3fff);
-	sceSdSetParam(1 | SD_PARAM_MVOLL, 0x3fff);
-	sceSdSetParam(1 | SD_PARAM_MVOLR, 0x3fff);
-}
 
 static inline u32
 rate_to_pitch(u32 sample_rate)
@@ -100,34 +71,49 @@ set_kon(void *)
 }
 
 int
-test()
+imp_EncodeSounds()
 {
 	struct lumphandle lump;
+	char name[8];
+	int i;
 
-	if (imp_FindLump("dsshotgn", &lump)) {
-		printf("found lump for dsshotgn!\n");
+	for (i = 0; i < NUMSFX; i++) {
+		sprintf(name, "ds%.6s", S_sfx[i].name);
+		if (!imp_FindLump(name, &lump)) {
+			continue;
+		}
+
+		printf("found lump for %s!\n", name);
 		printf("size %d\n", lump.size);
 		printf("pos %d\n", lump.position);
-	}
 
-	if (lump.size > MAX_SOUND_SIZE) {
-		printf("maximum sound size exceeded, bump up the limit!\n");
-		return -1;
-	}
+		if (lump.size > MAX_SOUND_SIZE) {
+			printf("maximum sound size exceeded, bump up the limit!\n");
+			return -1;
+		}
 
-	imp_ReadLump(&lump, buf);
+		imp_ReadLump(&lump, buf);
 
-	struct sound_header *hdr = (struct sound_header *)buf;
-	pcm8to16(&hdr->samples[0], pcm, hdr->sample_count);
+		struct sound_header *hdr = (struct sound_header *)buf;
+		pcm8to16(&hdr->samples[0], pcm, hdr->sample_count);
+		u32 count = hdr->sample_count - SAMPLE_PAD;
 
-	u32 count = hdr->sample_count - SAMPLE_PAD;
+		u32 err = sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
+		if (err < 0) {
+			printf("failed to wait for transfer %d", err);
+		}
 
-	int adp_len = psx_audio_spu_encode_simple(pcm, count, adpcm, -1);
-	u32 trans = sceSdVoiceTrans(1, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, adpcm, (u32 *)SPU_DST,
-	  adp_len);
-	if (trans < 0) {
-		printf("Bad transfer\n");
-		return 1;
+		int adp_len = psx_audio_spu_encode_simple(pcm, count, adpcm, -1);
+
+		u32 trans = sceSdVoiceTrans(1, SD_TRANS_WRITE | SD_TRANS_MODE_DMA, adpcm, (u32 *)spu_alloc,
+		  adp_len);
+		if (trans < 0) {
+			printf("Bad transfer\n");
+			return -1;
+		}
+
+		spu_alloc += adp_len;
+		printf("spu loc is 0x%08x\n", spu_alloc >> 1);
 	}
 
 	u32 err = sceSdVoiceTransStatus(channel, SPU_WAIT_FOR_TRANSFER);
@@ -135,25 +121,12 @@ test()
 		printf("failed to wait for transfer %d", err);
 	}
 
-	int fd = open("host:dump.bin", O_RDWR | O_CREAT);
-	write(fd, adpcm, adp_len);
-
-	printf("rate: %d\n", hdr->rate);
-	printf("pitch: %04x\n", rate_to_pitch(hdr->rate));
-	sceSdSetAddr(SD_VOICE(channel, voice) | SD_VADDR_SSA, SPU_DST);
-	sceSdSetParam(SD_VOICE(channel, voice) | SD_VPARAM_PITCH, rate_to_pitch(hdr->rate));
-	sceSdSetSwitch(channel | SD_SWITCH_KON, 1 << voice);
-
-	iop_sys_clock_t clock = { 0 };
-	USec2SysClock(1000000, &clock);
-	SetAlarm(&clock, set_kon, NULL);
-
 	return 0;
 }
 
 void
 imp_InitSound()
 {
-	initRegs();
-	test();
+	spu_alloc = SPU_BASE;
+	imp_EncodeSounds();
 }
