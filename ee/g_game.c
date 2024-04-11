@@ -236,7 +236,7 @@ G_BuildTiccmd(ticcmd_t *cmd)
 
 	// use two stage accelerative turning
 	// on the keyboard and joystick
-	if (joyxmove < 0 || joyxmove > 0 || gamekeydown[key_right] || gamekeydown[key_left])
+	if (joy2xmove < 0 || joy2xmove > 0 || gamekeydown[key_right] || gamekeydown[key_left])
 		turnheld += ticdup;
 	else
 		turnheld = 0;
@@ -436,6 +436,8 @@ G_DoLoadLevel(void)
 
 	// clear cmd building stuff
 	memset(gamekeydown, 0, sizeof(gamekeydown));
+	joyxmove = joyymove = 0;
+	joy2xmove = joy2ymove = 0;
 	joyxmove = joyymove = 0;
 	mousex = mousey = 0;
 	sendpause = sendsave = paused = false;
