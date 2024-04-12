@@ -41,7 +41,7 @@ uint32_t psx_audio_spu_get_buffer_size(int sample_count);
 uint32_t psx_audio_spu_get_buffer_size_per_block(void);
 uint32_t psx_audio_spu_get_samples_per_block(void);
 int psx_audio_spu_encode(psx_audio_encoder_channel_state_t *state, int16_t *samples,
-  int sample_count, int pitch, uint8_t *output);
+  int sample_count, uint8_t *output);
 int psx_audio_spu_encode_simple(int16_t *samples, int sample_count, uint8_t *output,
   int loop_start);
 void psx_audio_spu_set_flag_at_sample(uint8_t *spu_data, int sample_pos, int flag);
