@@ -181,7 +181,6 @@ dmaSend(enum DMA_CHAN chan, struct dmaList *list)
 {
 	uint32 chcr = 0, addr = 0;
 
-	SyncDCache(list->start, list->pos);
 	FlushCache(0);
 
 	addr = dmaCheckAddr((uint32)list->start);

@@ -23,6 +23,7 @@
 #include "d_main.h"
 #include "doomdef.h"
 #include "i_system.h"
+#include "imp_com.h"
 #include "m_argv.h"
 
 #include <loadfile.h>
@@ -105,6 +106,8 @@ main(int argc, char **argv)
 	}
 
 	sleep(5); // Wait for mass device
+
+	impcom_Init();
 
 	D_DoomMain();
 

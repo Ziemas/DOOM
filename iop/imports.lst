@@ -5,6 +5,7 @@
 #include <sysclib.h>
 #include <ioman.h>
 #include <libsd.h>
+#include <intrman.h>
 
 sysmem_IMPORTS_start
 I_AllocSysMemory
@@ -13,6 +14,7 @@ sysmem_IMPORTS_end
 sysclib_IMPORTS_start
 I_memcmp
 I_sprintf
+I_memset
 sysclib_IMPORTS_end
 
 libsd_IMPORTS_start
@@ -41,6 +43,9 @@ I_CreateThread
 I_GetThreadId
 I_USec2SysClock
 I_SetAlarm
+I_DelayThread
+I_GetSystemTime
+I_SysClock2USec
 thbase_IMPORTS_end
 
 sifcmd_IMPORTS_start
@@ -49,3 +54,8 @@ I_sceSifSetRpcQueue
 I_sceSifRegisterRpc
 I_sceSifRpcLoop
 sifcmd_IMPORTS_end
+
+intrman_IMPORTS_start
+I_CpuSuspendIntr
+I_CpuResumeIntr
+intrman_IMPORTS_end

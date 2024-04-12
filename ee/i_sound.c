@@ -21,6 +21,7 @@
 //-----------------------------------------------------------------------------
 
 #include "imp.h"
+#include "imp_com.h"
 
 #include <fcntl.h>
 #include <math.h>
@@ -34,17 +35,6 @@
 // Timer stuff. Experimental.
 #include "i_sound.h"
 #include "w_wad.h"
-
-static SifRpcClientData_t imp_client_data;
-
-// wasteful for the sync buffer...
-struct impCommandBuffer imp_syncbuf __attribute__((aligned(64)));
-struct impCommandBuffer imp_cmd_buf1 __attribute__((aligned(64)));
-struct impCommandBuffer imp_cmd_buf2 __attribute__((aligned(64)));
-u32 imp_return_values1[MAX_CMDBUF_ENTRIES] __attribute__((aligned));
-u32 imp_return_values2[MAX_CMDBUF_ENTRIES] __attribute__((aligned));
-u32 buf_pos[2];
-
 
 //
 // SFX API
@@ -118,6 +108,7 @@ I_UpdateSound(void)
 void
 I_SubmitSound(void)
 {
+	impcom_FlipBuffer();
 }
 
 void
@@ -133,21 +124,6 @@ I_ShutdownSound(void)
 void
 I_InitSound()
 {
-	int i;
-
-	SifInitRpc(0);
-
-	do {
-		if (SifBindRpc(&imp_client_data, IMP_MESSAGE_RPC, 0) < 0) {
-			printf("error: sceSifBindRpc in %s, at line %d\n", __FILE__, __LINE__);
-			while (1)
-				;
-		}
-
-		i = 10000;
-		while (i--)
-			;
-	} while (imp_client_data.server == NULL);
 }
 
 void

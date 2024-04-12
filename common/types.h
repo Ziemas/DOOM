@@ -1,6 +1,8 @@
 #ifndef TYPES_H_
 #define TYPES_H_
 
+#include <stdbool.h>
+
 #ifdef _EE
 typedef long long s64;
 typedef unsigned long long u64;

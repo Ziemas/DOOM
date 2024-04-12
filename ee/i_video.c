@@ -27,6 +27,7 @@
 #include "ps2/graph.h"
 #include "ps2/gs_regs.h"
 #include "v_video.h"
+#include "imp_com.h"
 
 #include <kernel.h>
 #include <libpad.h>

@@ -4,6 +4,7 @@
 #include "sound_data.h"
 #include "sysmem.h"
 
+#include <intrman.h>
 #include <ioman.h>
 #include <stdio.h>
 #include <sysclib.h>
@@ -21,7 +22,7 @@ imp_AddFile(char *filename)
 {
 	struct wadinfo header;
 	struct wad_file *wad;
-	int fd, i;
+	int fd, i, istate;
 
 	fd = open(filename, O_RDONLY);
 	if (fd < 0) {
@@ -36,8 +37,10 @@ imp_AddFile(char *filename)
 		return -1;
 	}
 
+	CpuSuspendIntr(&istate);
 	wad = AllocSysMemory(ALLOC_LAST, sizeof(*wad) + sizeof(struct filelump) * header.numlumps,
 	  NULL);
+	CpuResumeIntr(istate);
 
 	if (!wad) {
 		printf("WAD alloc failed (too many lumps?)\n");
