@@ -341,11 +341,14 @@ D_DoomLoop(void)
 
 		S_UpdateSounds(players[consoleplayer].mo); // move positional sounds
 
+		// Update sound output.
+		// moved because i'd like to flush the sound buffer
+		// before waiting for vsync
+		I_SubmitSound();
+
 		// Update display, next frame, with current state.
 		D_Display();
 
-		// Update sound output.
-		I_SubmitSound();
 	}
 }
 

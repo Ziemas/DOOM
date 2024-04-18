@@ -12,6 +12,8 @@ struct impCommandReturn {
 };
 
 enum impCmd {
+	IMP_CMD_GARBAGE, // 0 is invalid
+	IMP_CMD_BATCH,
 	IMP_CMD_INIT,
 	IMP_CMD_SOUND_INIT,
 	IMP_CMD_PLAYSND,
@@ -23,6 +25,7 @@ enum impCmd {
 };
 
 struct playSound {
+	u32 handle;
 	int id;
 	int vol;
 	int pitch;
@@ -31,7 +34,7 @@ struct playSound {
 };
 
 struct updateSound {
-	int handle;
+	u32 handle;
 	int vol;
 	int sep;
 	int pitch;
@@ -42,12 +45,13 @@ struct setVol {
 };
 
 struct playSong {
-	int handle;
+	u32 handle;
+	u32 music;
 	int looping;
 };
 
 struct handle {
-	int handle;
+	u32 handle;
 };
 
 struct impCommand {
@@ -62,7 +66,7 @@ struct impCommand {
 };
 
 struct impCommandBuffer {
-	int num_commands;
+	u32 num_commands;
 	struct impCommand cmd[MAX_CMDBUF_ENTRIES];
 } __attribute__((aligned(64)));
 

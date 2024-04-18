@@ -150,10 +150,6 @@ S_Init(int sfxVolume, int musicVolume)
 
 	// no sounds are playing, and they are not mus_paused
 	mus_paused = 0;
-
-	// Note that sounds have not been cached (yet).
-	for (i = 1; i < NUMSFX; i++)
-		S_sfx[i].lumpnum = S_sfx[i].usefulness = -1;
 }
 
 //
@@ -290,94 +286,15 @@ S_StartSoundAtVolume(void *origin_p, int sfx_id, int volume)
 	if (cnum < 0)
 		return;
 
-	//
-	// This is supposed to handle the loading/caching.
-	// For some odd reason, the caching is done nearly
-	//  each time the sound is needed?
-	//
-
-	// get lumpnum if necessary
-	if (sfx->lumpnum < 0)
-		sfx->lumpnum = I_GetSfxLumpNum(sfx);
-
-	// cache data if necessary
-	if (!sfx->data) {
-		fprintf(stderr, "S_StartSoundAtVolume: 16bit and not pre-cached - wtf?\n");
-
-		// DOS remains, 8bit handling
-		// sfx->data = (void *) W_CacheLumpNum(sfx->lumpnum, PU_MUSIC);
-		// fprintf( stderr,
-		//	     "S_StartSoundAtVolume: loading %d (lump %d) : 0x%x\n",
-		//       sfx_id, sfx->lumpnum, (int)sfx->data );
-	}
-
-	// increase the usefulness
-	if (sfx->usefulness++ < 0)
-		sfx->usefulness = 1;
-
 	// Assigns the handle to one of the channels in the
 	//  mix/output buffer.
-	channels[cnum].handle = I_StartSound(sfx_id,
-	  /*sfx->data,*/
-	  volume, sep, pitch, priority);
+	channels[cnum].handle = I_StartSound(sfx_id, volume, sep, pitch, priority);
 }
 
 void
 S_StartSound(void *origin, int sfx_id)
 {
-#ifdef SAWDEBUG
-	// if (sfx_id == sfx_sawful)
-	// sfx_id = sfx_itemup;
-#endif
-
 	S_StartSoundAtVolume(origin, sfx_id, snd_SfxVolume);
-
-	// UNUSED. We had problems, had we not?
-#ifdef SAWDEBUG
-	{
-		int i;
-		int n;
-
-		static mobj_t *last_saw_origins[10] = { 1, 1, 1, 1, 1, 1, 1, 1, 1, 1 };
-		static int first_saw = 0;
-		static int next_saw = 0;
-
-		if (sfx_id == sfx_sawidl || sfx_id == sfx_sawful || sfx_id == sfx_sawhit) {
-			for (i = first_saw; i != next_saw; i = (i + 1) % 10)
-				if (last_saw_origins[i] != origin)
-					fprintf(stderr,
-					  "old origin 0x%lx != "
-					  "origin 0x%lx for sfx %d\n",
-					  last_saw_origins[i], origin, sfx_id);
-
-			last_saw_origins[next_saw] = origin;
-			next_saw = (next_saw + 1) % 10;
-			if (next_saw == first_saw)
-				first_saw = (first_saw + 1) % 10;
-
-			for (n = i = 0; i < numChannels; i++) {
-				if (channels[i].sfxinfo == &S_sfx[sfx_sawidl] ||
-				  channels[i].sfxinfo == &S_sfx[sfx_sawful] ||
-				  channels[i].sfxinfo == &S_sfx[sfx_sawhit])
-					n++;
-			}
-
-			if (n > 1) {
-				for (i = 0; i < numChannels; i++) {
-					if (channels[i].sfxinfo == &S_sfx[sfx_sawidl] ||
-					  channels[i].sfxinfo == &S_sfx[sfx_sawful] ||
-					  channels[i].sfxinfo == &S_sfx[sfx_sawhit]) {
-						fprintf(stderr,
-						  "chn: sfxinfo=0x%lx, origin=0x%lx, "
-						  "handle=%d\n",
-						  channels[i].sfxinfo, channels[i].origin, channels[i].handle);
-					}
-				}
-				fprintf(stderr, "\n");
-			}
-		}
-	}
-#endif
 }
 
 void
@@ -430,26 +347,6 @@ S_UpdateSounds(void *listener_p)
 	channel_t *c;
 
 	mobj_t *listener = (mobj_t *)listener_p;
-
-	// Clean up unused data.
-	// This is currently not done for 16bit (sounds cached static).
-	// DOS 8bit remains.
-	/*if (gametic > nextcleanup)
-	{
-	for (i=1 ; i<NUMSFX ; i++)
-	{
-		if (S_sfx[i].usefulness < 1
-		&& S_sfx[i].usefulness > -1)
-		{
-		if (--S_sfx[i].usefulness == -1)
-		{
-			Z_ChangeTag(S_sfx[i].data, PU_CACHE);
-			S_sfx[i].data = 0;
-		}
-		}
-	}
-	nextcleanup = gametic + 15;
-	}*/
 
 	for (cnum = 0; cnum < numChannels; cnum++) {
 		c = &channels[cnum];
@@ -532,12 +429,13 @@ void
 S_ChangeMusic(int musicnum, int looping)
 {
 	musicinfo_t *music;
-	char namebuf[9];
 
 	if ((musicnum <= mus_None) || (musicnum >= NUMMUSIC)) {
 		I_Error("Bad music number %d", musicnum);
-	} else
+		return;
+	} else {
 		music = &S_music[musicnum];
+	}
 
 	if (mus_playing == music)
 		return;
@@ -545,18 +443,8 @@ S_ChangeMusic(int musicnum, int looping)
 	// shutdown old music
 	S_StopMusic();
 
-	// get lumpnum if neccessary
-	if (!music->lumpnum) {
-		sprintf(namebuf, "d_%s", music->name);
-		music->lumpnum = W_GetNumForName(namebuf);
-	}
-
-	// load & register it
-	music->data = (void *)W_CacheLumpNum(music->lumpnum, PU_MUSIC);
-	music->handle = I_RegisterSong(music->data);
-
 	// play it
-	I_PlaySong(music->handle, looping);
+	music->handle = I_PlaySong(music->handle, looping);
 
 	mus_playing = music;
 }
@@ -570,9 +458,7 @@ S_StopMusic(void)
 
 		I_StopSong(mus_playing->handle);
 		I_UnRegisterSong(mus_playing->handle);
-		Z_ChangeTag(mus_playing->data, PU_CACHE);
 
-		mus_playing->data = 0;
 		mus_playing = 0;
 	}
 }
@@ -587,10 +473,6 @@ S_StopChannel(int cnum)
 	if (c->sfxinfo) {
 		// stop the sound playing
 		if (I_SoundIsPlaying(c->handle)) {
-#ifdef SAWDEBUG
-			if (c->sfxinfo == &S_sfx[sfx_sawful])
-				fprintf(stderr, "stopped\n");
-#endif
 			I_StopSound(c->handle);
 		}
 
@@ -601,9 +483,6 @@ S_StopChannel(int cnum)
 				break;
 			}
 		}
-
-		// degrade usefulness of sound data
-		c->sfxinfo->usefulness--;
 
 		c->sfxinfo = 0;
 	}

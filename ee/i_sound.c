@@ -36,6 +36,8 @@
 #include "i_sound.h"
 #include "w_wad.h"
 
+static u32 next_handle = 0;
+
 //
 // SFX API
 // Note: this was called by S_Init.
@@ -59,6 +61,7 @@ I_SetSfxVolume(int volume)
 	//  to the state variable used in
 	//  the mixing.
 	snd_SfxVolume = volume;
+	impcom_SetSfxVolume(volume);
 }
 
 // MUSIC API - dummy. Some code from DOS version.
@@ -69,6 +72,7 @@ I_SetMusicVolume(int volume)
 	snd_MusicVolume = volume;
 	// Now set volume on output device.
 	// Whatever( snd_MusciVolume );
+	impcom_SetMusicVolume(volume);
 }
 
 //
@@ -86,7 +90,9 @@ I_GetSfxLumpNum(sfxinfo_t *sfx)
 int
 I_StartSound(int id, int vol, int sep, int pitch, int priority)
 {
-	return 0;
+	u32 h = next_handle++;
+	impcom_StartSound(h, id, vol, sep, pitch, priority);
+	return h;
 }
 
 void
@@ -108,7 +114,7 @@ I_UpdateSound(void)
 void
 I_SubmitSound(void)
 {
-	impcom_FlipBuffer();
+	impcom_FlushBuffer();
 }
 
 void
@@ -136,9 +142,12 @@ I_ShutdownMusic(void)
 {
 }
 
-void
-I_PlaySong(int handle, int looping)
+int
+I_PlaySong(int musicnum, int looping)
 {
+	u32 h = next_handle++;
+	//impcom_PlaySong(h, musicnum, looping);
+	return h;
 }
 
 void

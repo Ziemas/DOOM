@@ -18,37 +18,83 @@ s32 rpcThreadId = 0;
 // static u32 *retBufPos = NULL;
 
 static struct impCommandBuffer cmd_buf;
-static u32 returnBuffer[MAX_CMDBUF_ENTRIES] __attribute__((aligned(64)));
-static u32 *retBufPos = NULL;
+static u32 returnBuffer[MAX_CMDBUF_ENTRIES + 1] __attribute__((aligned(64)));
+
+#define MARK() (printf("RPC %s called\n", __FUNCTION__))
 
 static void
-imp_c_Init(u8 *)
+imp_c_Init(struct impCommand *, u32 *ret)
 {
 	printf("--- IMP INIT ---\n");
 
-	*retBufPos = 0;
+	*ret = 0;
+}
+
+static void
+imp_c_PlaySound(struct impCommand *cmd, u32 *ret)
+{
+	struct playSound *s = &cmd->snd;
+
+	printf("playsnd: %d %d %d\n", s->id, s->vol, s->priority);
+
+	*ret = 0;
+}
+
+static void
+imp_c_PlaySong(struct impCommand *cmd, u32 *ret)
+{
+	MARK();
+	*ret = 0;
+}
+
+static void
+imp_c_SetSfxVol(struct impCommand *cmd, u32 *ret)
+{
+	MARK();
+	*ret = 0;
+}
+
+static void
+imp_c_SetMusicVol(struct impCommand *cmd, u32 *ret)
+{
+	MARK();
+	*ret = 0;
 }
 
 /* Separate sound init, so we can get some files before starting the encoder */
 static void
-imp_c_InitSound(u8 *)
+imp_c_InitSound(struct impCommand *, u32 *ret)
 {
 	imp_InitSound();
 
-	*retBufPos = 0;
+	*ret = 0;
 }
 
-static void (*commandFunc[IMP_CMD_MAX])(u8 *) = {
+static void (*commandFunc[IMP_CMD_MAX])(struct impCommand *, u32 *) = {
 	[IMP_CMD_INIT] = imp_c_Init,
+	[IMP_CMD_PLAYSND] = imp_c_PlaySound,
+	[IMP_CMD_PLAYSONG] = imp_c_PlaySong,
 	[IMP_CMD_SOUND_INIT] = imp_c_InitSound,
+	[IMP_CMD_SETSFXVOL] = imp_c_SetSfxVol,
+	[IMP_CMD_SETMUSICVOL] = imp_c_SetMusicVol,
 };
 
 static void *
 imp_MessageParser(u32 command, void *data, s32 size)
 {
-	retBufPos = &returnBuffer[1];
-	commandFunc[command](data);
-	retBufPos[1] = -1;
+	struct impCommandBuffer *buf = data;
+	struct impCommand *cmd;
+
+	for (int i = 0; i < buf->num_commands; i++) {
+		cmd = &buf->cmd[i];
+		if (cmd->cmdId >= IMP_CMD_MAX) {
+			printf("%s: BAD COMMAND ID! (trash data dma'd?)", __FUNCTION__);
+		}
+
+		commandFunc[cmd->cmdId](cmd, &returnBuffer[i + 1]);
+	}
+
+	returnBuffer[0] = 0xf0f0f0f0;
 
 	return returnBuffer;
 }
@@ -72,17 +118,11 @@ int
 _start()
 {
 	iop_thread_t param;
-	int istate;
 
 	if (sceSdInit(0) < 0) {
 		printf("SD INIT FAILED");
 		return 0;
 	}
-
-	// CpuSuspendIntr(&istate);
-	// messageBuffer = AllocSysMemory(ALLOC_FIRST, 0x1000, NULL);
-	// returnBuffer = AllocSysMemory(ALLOC_FIRST, 0x420, NULL);
-	// CpuResumeIntr(istate);
 
 	param.attr = TH_C;
 	param.thread = (void (*)(void *))imp_RpcThread;
@@ -99,7 +139,7 @@ _start()
 
 	imp_IdentifyVersion();
 
-	imp_InitSound();
+	//imp_InitSound();
 
 	return 0;
 }

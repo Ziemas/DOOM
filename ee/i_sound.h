@@ -77,7 +77,7 @@ int I_RegisterSong(void *data);
 //  plays a song, and when the song is done,
 //  starts playing it again in an endless loop.
 // Horrible thing to do, considering.
-void I_PlaySong(int handle, int looping);
+int I_PlaySong(int musicnum, int looping);
 // Stops a song over 3 seconds.
 void I_StopSong(int handle);
 // See above (register), then think backwards

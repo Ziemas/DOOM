@@ -46,14 +46,6 @@ struct sfxinfo_struct {
 	// volume if a link
 	int volume;
 
-	// sound data
-	void *data;
-
-	// this is checked every second to see if sound
-	// can be thrown out (if 0, then decrement, if -1,
-	// then throw out, if > 0, then it is in use)
-	int usefulness;
-
 	// lump number of sfx
 	int lumpnum;
 };
@@ -67,9 +59,6 @@ typedef struct {
 
 	// lump number of music
 	int lumpnum;
-
-	// music data
-	void *data;
 
 	// music handle once registered
 	int handle;
