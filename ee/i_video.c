@@ -23,11 +23,11 @@
 #include "d_main.h"
 #include "doomdef.h"
 #include "i_system.h"
+#include "imp_com.h"
 #include "ps2/dma.h"
 #include "ps2/graph.h"
 #include "ps2/gs_regs.h"
 #include "v_video.h"
-#include "imp_com.h"
 
 #include <kernel.h>
 #include <libpad.h>
@@ -49,8 +49,6 @@ struct color {
 };
 
 struct color palbuf[256] __attribute__((aligned(128)));
-
-byte fb[512 * 256 * 4] __attribute__((aligned(128)));
 
 // does this really belong here
 struct dmaDispBuffer {
@@ -426,13 +424,27 @@ struct texFmt {
 	[GS_PSMCT32] = { .size_to_qw = 2 },
 	[GS_PSMCT24] = { .size_to_qw = 2 },
 	[GS_PSMT8] = { .size_to_qw = 4 },
+	[GS_PSMT8H] = { .size_to_qw = 4 },
 };
+
+static uint32
+next_pow2(uint32 v)
+{
+	v--;
+	v |= v >> 1;
+	v |= v >> 2;
+	v |= v >> 4;
+	v |= v >> 8;
+	v |= v >> 16;
+	v++;
+	return v;
+}
 
 static void
 UploadImage(struct dmaList *list, void *image, int width, int height, int psm, int dest)
 {
 	uint32 qw = (width * height) >> texInfo[psm].size_to_qw;
-	uint32 dbw = (width) / 64;
+	uint32 dbw = (next_pow2(width)) / 64;
 	if (dbw == 0)
 		dbw = 1;
 	uint32 block = qw / GIF_BLOCK_SIZE;
@@ -477,7 +489,7 @@ DrawFrame(struct dmaList *list)
 	dmaAddGIFtag(list, 8, 1, 1, GS_PRIM_SPRITE, GIF_PACKED, 1, GIF_PACKED_AD);
 
 	dmaAddAD(list, GS_R_TEX0_1,
-	  GS_SET_TEX0(screenStart, 512 / 64, GS_PSMT8, 9, 8, 0, GS_DECAL, clutStart, GS_PSMCT32, 0, 0,
+	  GS_SET_TEX0(screenStart, 512 / 64, GS_PSMT8H, 9, 8, 0, GS_DECAL, clutStart, GS_PSMCT32, 0, 0,
 		1));
 
 	dmaAddAD(list, GS_R_TEX1_1, GS_SET_TEX1(0, 0, 1, 1, 0, 0, 0));
@@ -490,16 +502,6 @@ DrawFrame(struct dmaList *list)
 
 	dmaAddAD(list, GS_R_UV, GS_SET_UV(330 << 4, 200 << 4));
 	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(((x + w)) << 4, ((y + h)) << 4, 0));
-}
-
-void
-render(uint8 *src, uint8 *dest, uint32 src_width, uint32 src_height, uint32 dest_buffer_width)
-{
-	while (src_height--) {
-		memcpy(dest, src, src_width);
-		dest += dest_buffer_width;
-		src += src_width;
-	}
 }
 
 //
@@ -516,8 +518,7 @@ I_FinishUpdate(void)
 	SetDraw(&dma_buffers.draw[f], &list);
 	Clear(&list, 0x80, 0x0, 0x0);
 
-	render(screens[0], fb, SCREENWIDTH, SCREENHEIGHT, 512);
-	UploadImage(&list, fb, 512, 256, GS_PSMT8, screenStart);
+	UploadImage(&list, screens[0], SCREENWIDTH, SCREENHEIGHT, GS_PSMT8H, screenStart);
 
 	if (pal_dirty) {
 		UploadImage(&list, palbuf, 16, 16, GS_PSMCT32, clutStart);
@@ -628,7 +629,9 @@ InitBuffers(struct dmaBuffers *buffers, int width, int height, int psm, int zpsm
 	buffers->draw[1].frame1 |= fbp;
 	buffers->draw[1].frame2 |= fbp;
 
-	screenStart = gsAllocPtr / 4 / 64;
+	// screenStart = gsAllocPtr / 4 / 64;
+	//  Upload screen as PSMT8H in the framebuffer space
+	screenStart = 0;
 	clutStart = gsEnd - 10;
 }
 
@@ -675,7 +678,7 @@ I_InitGraphics(void)
 
 	dmaInit();
 	graphReset(GS_INTERLACE, GS_MODE_NTSC, GS_FIELD);
-	InitBuffers(&dma_buffers, OUTPUT_WIDTH, OUTPUT_HEIGHT, GS_PSMCT32, GS_PSMZ24);
+	InitBuffers(&dma_buffers, OUTPUT_WIDTH, OUTPUT_HEIGHT, GS_PSMCT24, GS_PSMZ24);
 	dmaStart(&list, gif_buffer, SP_SIZE);
 	InitGsRegs(&list);
 	dmaFinish(&list);
