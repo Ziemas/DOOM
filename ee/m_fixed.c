@@ -76,33 +76,17 @@ FixedDiv(fixed_t a, fixed_t b)
 #define abs(x) ((x) < 0 ? (-x) : (x))
 
 static inline int
-nlz(unsigned x)
+nlz(u32 x)
 {
-	int n;
+	u64 result;
 
-	if (x == 0)
-		return (32);
-	n = 0;
-	if (x <= 0x0000FFFF) {
-		n = n + 16;
-		x = x << 16;
+	if (x & 0x80000000) {
+		return 0;
 	}
-	if (x <= 0x00FFFFFF) {
-		n = n + 8;
-		x = x << 8;
-	}
-	if (x <= 0x0FFFFFFF) {
-		n = n + 4;
-		x = x << 4;
-	}
-	if (x <= 0x3FFFFFFF) {
-		n = n + 2;
-		x = x << 2;
-	}
-	if (x <= 0x7FFFFFFF) {
-		n = n + 1;
-	}
-	return n;
+
+	__asm__("plzcw %0, %1" : "=r"(result) : "r"(x));
+
+	return (u32)result + 1;
 }
 
 static inline u32
@@ -233,17 +217,19 @@ div_2by1(u32 *q, u32 *r, u32 u1, u32 u0, u32 d, u32 v)
 	q1 += u1 + (q0 < u0);
 	q1 += 1;
 
-	r0 = u0 - q1 * d;
+	r0 = u0 - umullo(q1, d);
+
 	if (r0 > q0) {
 		q1 -= 1;
 		r0 -= d;
 	}
 
+	/* take this out to match previous implementation
 	if (r0 >= d) {
-		// rounding taken out to match previous implementation
-		// q1 += 1;
+		q1 += 1;
 		r0 -= d;
 	}
+	*/
 
 	*q = q1;
 	*r = r0;
@@ -269,9 +255,7 @@ divlu_fast(u64 u, u32 d)
 	}
 
 	div_2by1(&q, &r, n1, n0, d, m);
-
 	r >>= s;
-	d >>= s;
 
 	return q;
 }
