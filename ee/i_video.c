@@ -500,7 +500,7 @@ DrawFrame(struct dmaList *list)
 	dmaAddAD(list, GS_R_UV, GS_SET_UV(0, 0));
 	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ((x) << 4, (y) << 4, 0));
 
-	dmaAddAD(list, GS_R_UV, GS_SET_UV(330 << 4, 200 << 4));
+	dmaAddAD(list, GS_R_UV, GS_SET_UV(SCREENWIDTH << 4, SCREENHEIGHT << 4));
 	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(((x + w)) << 4, ((y + h)) << 4, 0));
 }
 
