@@ -8,6 +8,7 @@
 
 #include <ioman.h>
 #include <libsd.h>
+#include <limits.h>
 #include <list.h>
 #include <sysclib.h>
 
@@ -37,9 +38,103 @@ static const int filter[5][2] = {
 	{ -1952, 960 },
 };
 
-static void
-encode_block(s16 *dest, u8 *src)
+#define clamp(x, min, max) ((x) > (max) ? (max) : ((x) < (min) ? (min) : (x)))
+#define abs(x) ((x) < 0 ? (-(x)) : (x))
+#define min(X, Y) ((X) < (Y) ? (X) : (Y))
+
+static inline u32
+swar_add(u32 a, u32 b)
 {
+	const u32 h = 0x80808080;
+	return ((a & ~h) + (b & ~h)) ^ ((a ^ b) & h);
+}
+
+static inline u32
+swar_sub(u32 a, u32 b)
+{
+	const u32 h = 0x80808080;
+	return ((a | h) - (b & ~h)) ^ ((a ^ ~b) & h);
+}
+
+// these should be reset on new sound
+static short prev_in[2] = {};
+static short prev_out[2] = {};
+
+void
+encode_block(s16 *dest, u8 *src, u8 *out_filt, u8 *out_shift)
+{
+	s16(*const sp)[28] = (void *)0x1f800800;
+	int(*const workspace)[5][28] = (void *)0x1f800800 + 0x30;
+	int sample;
+	s32 filt_peak[5];
+	u32 peak = INT_MAX;
+
+	/* unsigned 8bit pcm to s16 conversion with SWAR subtraction */
+	/* TODO make sure this is faster than the scalar version */
+
+	for (int i = 0; i < (28 / 4); i++) {
+		u32 in = ((u32 *)src)[i];
+		u32 r = swar_sub(in, 0x80808080);
+
+		s32 a = (((s32)r << 0) & 0xff000000) >> 16;
+		(*sp)[(i * 4) + 3] = clamp((s16)a, -30720, 30719);
+
+		s32 b = (((s32)r << 0x08) & 0xff000000) >> 16;
+		(*sp)[(i * 4) + 2] = clamp((s16)b, -30720, 30719);
+
+		s32 c = (((s32)r << 16) & 0xff000000) >> 16;
+		(*sp)[(i * 4) + 1] = clamp((s16)c, -30720, 30719);
+
+		s32 d = (((s32)r << 24) & 0xff000000) >> 16;
+		(*sp)[(i * 4) + 0] = clamp((s16)d, -30720, 30719);
+	}
+
+	/*
+	for (int i = 0; i < 28; i++) {
+		test[i] = clamp((s16)(src[i] - 0x80) << 8, -30720, 30719);
+	}
+	*/
+
+	for (int filt = 0; filt < 5; filt++) {
+		filt_peak[filt] = 0;
+
+		for (int sidx = 0; sidx < 28; sidx++) {
+			/* 21.10 fixed point */
+			sample = (*sp)[sidx] << 10;
+			if (filt) {
+				sample += filter[filt][0] * prev_in[0] + filter[filt][1] * prev_in[1];
+			}
+
+			(*workspace)[filt][sidx] = sample;
+
+			sample = abs(sample);
+			if (filt_peak[filt] < sample) {
+				filt_peak[filt] = sample;
+			}
+
+			prev_in[1] = prev_in[0];
+			prev_in[0] = (*sp)[sidx];
+		}
+
+		if (filt_peak[filt] < peak) {
+			peak = filt_peak[filt];
+			*out_filt = filt;
+		}
+
+		if (filt == 0 && filt_peak[filt] < 0x1c01) {
+			*out_filt = 0;
+			break;
+		}
+	}
+
+	if (filt_peak[*out_filt] < 0) {
+	}
+
+	*out_shift = 0;
+
+	for (int i = 0; i < 28; i++) {
+		int s = prev_out[0] * filter[*out_filt][0];
+	}
 }
 
 static inline u32
@@ -52,7 +147,7 @@ static inline void
 pcm8to16(u8 *src, s16 *dest, u32 size)
 {
 	for (int i = 0; i < size; i++) {
-		dest[i] = (s16)(src[i] - 0x80) << 8;
+		dest[i] = ((s16)(src[i] - 0x80) << 8);
 	}
 }
 
@@ -88,8 +183,9 @@ imp_EncodeSounds()
 		imp_ReadLump(&lump, buf);
 
 		struct sound_header *hdr = (struct sound_header *)buf;
+		encode_block(&hdr->samples[0], pcm, NULL, NULL);
 		pcm8to16(&hdr->samples[0], pcm, hdr->sample_count);
-		u32 count = hdr->sample_count - SAMPLE_PAD;
+		u32 count = hdr->sample_count;
 
 		int adp_len = psx_audio_spu_encode_simple(pcm, count, adpcm, -1);
 
@@ -110,7 +206,7 @@ imp_EncodeSounds()
 		sfx->spu_addr = spu_alloc;
 		sfx->spu_pitch = rate_to_pitch(hdr->rate);
 
-		spu_alloc += adp_len;
+		spu_alloc += adp_len + 0x20;
 	}
 
 	GetSystemTime(&t2);
@@ -178,6 +274,8 @@ test()
 void
 imp_InitSound()
 {
+	*(volatile int *)0xfffe0144 = 0x1f800800;
+
 	spu_alloc = SPU_BASE;
 	memset(sound_storage, 0, sizeof(sound_storage));
 
