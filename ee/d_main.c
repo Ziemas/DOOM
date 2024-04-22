@@ -498,8 +498,8 @@ void
 IdentifyVersion(void)
 {
 	sprintf(basedefault, "%s/.doomrc", "mass:");
-	D_AddFile("mass:doom.wad");
 	D_AddFile("doom.wad");
+	D_AddFile("mass:doom.wad");
 
 	gamemode = registered;
 

@@ -114,8 +114,8 @@ imp_ReadLump(struct lumphandle *lump, u8 *dest)
 int
 imp_IdentifyVersion()
 {
+	imp_AddFile("mass:doom.wad");
 	imp_AddFile("host:doom.wad");
-	// imp_AddFile("mass:doom.wad");
 
 	return 0;
 }
