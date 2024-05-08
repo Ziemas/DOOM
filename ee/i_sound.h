@@ -25,6 +25,14 @@
 #include "doomdef.h"
 #include "doomstat.h"
 #include "sounds.h"
+#include "types.h"
+
+struct sound_header {
+	u16 fmt;
+	u16 rate;
+	u32 sample_count;
+	u8 samples[0];
+};
 
 // Init at program start...
 void I_InitSound();

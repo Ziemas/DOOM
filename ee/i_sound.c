@@ -22,11 +22,14 @@
 
 #include "imp.h"
 #include "imp_com.h"
+#include "ps2/libpsxav.h"
 
 #include <fcntl.h>
+#include <malloc.h>
 #include <math.h>
 #include <sifrpc.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <sys/ioctl.h>
 #include <sys/time.h>
 #include <sys/types.h>
@@ -35,6 +38,7 @@
 // Timer stuff. Experimental.
 #include "i_sound.h"
 #include "w_wad.h"
+#include "z_zone.h"
 
 static u32 next_handle = 0;
 
@@ -127,9 +131,83 @@ I_ShutdownSound(void)
 {
 }
 
+static inline u32
+rate_to_pitch(u32 sample_rate)
+{
+	return (sample_rate << 12) / 48000;
+}
+
+/* Requires buffers are qw aligned */
+static inline void
+pcm8to16(s16 *dest, u8 *src, u32 count)
+{
+	/*
+		static const u8 sub[16] __attribute__((aligned(128))) = { 0x80, 0x80, 0x80, 0x80, 0x80,
+	   0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80, 0x80 };
+
+		u32 qw = count / 16;
+		u32 remaining = count % 16;
+
+		__asm__("lq \n"
+				""
+				: "=m"(dest)
+				: "m"(src), "r"(qw), "r"(remaining)
+				:);
+	*/
+
+	for (int i = 0; i < count; i++) {
+		dest[i] = ((s16)(src[i] - 0x80) << 8);
+	}
+}
+
+void
+I_BuildSoundBank()
+{
+	struct sound_header *hdr;
+	sfxinfo_t *sfx;
+	char nbuf[9];
+	s16 *sbuf;
+
+	struct {
+		u8 *adpcm;
+		u32 size;
+		u16 pitch;
+	} sound[NUMSFX];
+
+	memset(sound, 0, sizeof(sound));
+
+	for (int i = 1; i < NUMSFX; i++) {
+		sfx = &S_sfx[i];
+
+		sprintf(nbuf, "ds%.6s", sfx->name);
+		int lump = W_CheckNumForName(nbuf);
+		if (lump == -1) {
+			continue;
+		}
+
+		hdr = W_CacheLumpNum(lump, PU_CACHE);
+		sbuf = malloc(hdr->sample_count * 2);
+
+		sound[i].size = psx_audio_spu_get_buffer_size(hdr->sample_count);
+		sound[i].adpcm = malloc(sound[i].size);
+
+		pcm8to16(sbuf, hdr->samples, hdr->sample_count);
+		psx_audio_spu_encode_simple(sbuf, hdr->sample_count, sound[i].adpcm, -1);
+
+		sound[i].pitch = rate_to_pitch(hdr->rate);
+
+		free(sbuf);
+	}
+
+	for (int i = 1; i < NUMSFX; i++) {
+		free(sound[i].adpcm);
+	}
+}
+
 void
 I_InitSound()
 {
+	I_BuildSoundBank();
 }
 
 void
@@ -146,7 +224,7 @@ int
 I_PlaySong(int musicnum, int looping)
 {
 	u32 h = next_handle++;
-	//impcom_PlaySong(h, musicnum, looping);
+	// impcom_PlaySong(h, musicnum, looping);
 	return h;
 }
 

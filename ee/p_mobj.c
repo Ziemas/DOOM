@@ -60,8 +60,8 @@ P_SetMobjState(mobj_t *mobj, statenum_t state)
 
 		// Modified handling.
 		// Call action functions when the state is set
-		if (st->action.acp1)
-			st->action.acp1(mobj);
+		if (st->action)
+			st->action(mobj, NULL);
 
 		state = st->nextstate;
 	} while (!mobj->tics);
@@ -356,14 +356,14 @@ P_MobjThinker(mobj_t *mobj)
 		P_XYMovement(mobj);
 
 		// FIXME: decent NOP/NULL/Nil function pointer please.
-		if (mobj->thinker.function.acv == (actionf_v)(-1))
+		if (mobj->thinker.function == (actionf_t)(-1))
 			return; // mobj was removed
 	}
 	if ((mobj->z != mobj->floorz) || mobj->momz) {
 		P_ZMovement(mobj);
 
 		// FIXME: decent NOP/NULL/Nil function pointer please.
-		if (mobj->thinker.function.acv == (actionf_v)(-1))
+		if (mobj->thinker.function == (actionf_t)(-1))
 			return; // mobj was removed
 	}
 
@@ -448,7 +448,7 @@ P_SpawnMobj(fixed_t x, fixed_t y, fixed_t z, mobjtype_t type)
 	else
 		mobj->z = z;
 
-	mobj->thinker.function.acp1 = (actionf_p1)P_MobjThinker;
+	mobj->thinker.function = (actionf_t)P_MobjThinker;
 
 	P_AddThinker(&mobj->thinker);
 

@@ -1144,7 +1144,6 @@ typedef struct {
 	spritenum_t sprite;
 	long frame;
 	long tics;
-	// void		(*action) ();
 	actionf_t action;
 	statenum_t nextstate;
 	long misc1, misc2;

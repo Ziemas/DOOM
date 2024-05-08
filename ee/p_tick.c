@@ -69,7 +69,7 @@ void
 P_RemoveThinker(thinker_t *thinker)
 {
 	// FIXME: NOP.
-	thinker->function.acv = (actionf_v)(-1);
+	thinker->function = (actionf_t)(-1);
 }
 
 //
@@ -91,14 +91,14 @@ P_RunThinkers(void)
 
 	currentthinker = thinkercap.next;
 	while (currentthinker != &thinkercap) {
-		if (currentthinker->function.acv == (actionf_v)(-1)) {
+		if (currentthinker->function == (actionf_t)(-1)) {
 			// time to remove it
 			currentthinker->next->prev = currentthinker->prev;
 			currentthinker->prev->next = currentthinker->next;
 			Z_Free(currentthinker);
 		} else {
-			if (currentthinker->function.acp1)
-				currentthinker->function.acp1(currentthinker);
+			if (currentthinker->function)
+				currentthinker->function(currentthinker, NULL);
 		}
 		currentthinker = currentthinker->next;
 	}

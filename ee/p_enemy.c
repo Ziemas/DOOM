@@ -484,7 +484,7 @@ A_KeenDie(mobj_t *mo)
 	// scan the remaining thinkers
 	// to see if all Keens are dead
 	for (th = thinkercap.next; th != &thinkercap; th = th->next) {
-		if (th->function.acp1 != (actionf_p1)P_MobjThinker)
+		if (th->function != (actionf_t)P_MobjThinker)
 			continue;
 
 		mo2 = (mobj_t *)th;
@@ -1308,7 +1308,7 @@ A_PainShootSkull(mobj_t *actor, angle_t angle)
 
 	currentthinker = thinkercap.next;
 	while (currentthinker != &thinkercap) {
-		if ((currentthinker->function.acp1 == (actionf_p1)P_MobjThinker) &&
+		if ((currentthinker->function == (actionf_t)P_MobjThinker) &&
 		  ((mobj_t *)currentthinker)->type == MT_SKULL)
 			count++;
 		currentthinker = currentthinker->next;
@@ -1365,7 +1365,7 @@ A_PainDie(mobj_t *actor)
 }
 
 void
-A_Scream(mobj_t *actor)
+A_Scream(mobj_t *actor, void*)
 {
 	int sound;
 
@@ -1424,7 +1424,7 @@ A_Fall(mobj_t *actor)
 // A_Explode
 //
 void
-A_Explode(mobj_t *thingy)
+A_Explode(mobj_t *thingy, void*)
 {
 	P_RadiusAttack(thingy, thingy->target, 128);
 }
@@ -1511,7 +1511,7 @@ A_BossDeath(mobj_t *mo)
 	// scan the remaining thinkers to see
 	// if all bosses are dead
 	for (th = thinkercap.next; th != &thinkercap; th = th->next) {
-		if (th->function.acp1 != (actionf_p1)P_MobjThinker)
+		if (th->function != (actionf_t)P_MobjThinker)
 			continue;
 
 		mo2 = (mobj_t *)th;
@@ -1611,7 +1611,7 @@ int numbraintargets;
 int braintargeton;
 
 void
-A_BrainAwake(mobj_t *mo)
+A_BrainAwake(mobj_t *mo, void*)
 {
 	thinker_t *thinker;
 	mobj_t *m;
@@ -1622,7 +1622,7 @@ A_BrainAwake(mobj_t *mo)
 
 	thinker = thinkercap.next;
 	for (thinker = thinkercap.next; thinker != &thinkercap; thinker = thinker->next) {
-		if (thinker->function.acp1 != (actionf_p1)P_MobjThinker)
+		if (thinker->function != (actionf_t)P_MobjThinker)
 			continue; // not a mobj
 
 		m = (mobj_t *)thinker;
@@ -1667,7 +1667,7 @@ A_BrainScream(mobj_t *mo)
 }
 
 void
-A_BrainExplode(mobj_t *mo)
+A_BrainExplode(mobj_t *mo, void*)
 {
 	int x;
 	int y;

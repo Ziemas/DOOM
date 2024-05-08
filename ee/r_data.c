@@ -731,7 +731,7 @@ R_PrecacheLevel(void)
 	memset(spritepresent, 0, numsprites);
 
 	for (th = thinkercap.next; th != &thinkercap; th = th->next) {
-		if (th->function.acp1 == (actionf_p1)P_MobjThinker)
+		if (th->function == (actionf_t)P_MobjThinker)
 			spritepresent[((mobj_t *)th)->sprite] = 1;
 	}
 

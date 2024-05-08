@@ -209,7 +209,7 @@ P_ArchiveThinkers(void)
 
 	// save off the current thinkers
 	for (th = thinkercap.next; th != &thinkercap; th = th->next) {
-		if (th->function.acp1 == (actionf_p1)P_MobjThinker) {
+		if (th->function == (actionf_t)P_MobjThinker) {
 			*save_p++ = tc_mobj;
 			PADSAVEP();
 			mobj = (mobj_t *)save_p;
@@ -245,7 +245,7 @@ P_UnArchiveThinkers(void)
 	while (currentthinker != &thinkercap) {
 		next = currentthinker->next;
 
-		if (currentthinker->function.acp1 == (actionf_p1)P_MobjThinker)
+		if (currentthinker->function == (actionf_t)P_MobjThinker)
 			P_RemoveMobj((mobj_t *)currentthinker);
 		else
 			Z_Free(currentthinker);
@@ -276,7 +276,7 @@ P_UnArchiveThinkers(void)
 			mobj->info = &mobjinfo[mobj->type];
 			mobj->floorz = mobj->subsector->sector->floorheight;
 			mobj->ceilingz = mobj->subsector->sector->ceilingheight;
-			mobj->thinker.function.acp1 = (actionf_p1)P_MobjThinker;
+			mobj->thinker.function = (actionf_t)P_MobjThinker;
 			P_AddThinker(&mobj->thinker);
 			break;
 
@@ -327,7 +327,7 @@ P_ArchiveSpecials(void)
 
 	// save off the current thinkers
 	for (th = thinkercap.next; th != &thinkercap; th = th->next) {
-		if (th->function.acv == (actionf_v)NULL) {
+		if (th->function == (actionf_t)NULL) {
 			for (i = 0; i < MAXCEILINGS; i++)
 				if (activeceilings[i] == (ceiling_t *)th)
 					break;
@@ -343,7 +343,7 @@ P_ArchiveSpecials(void)
 			continue;
 		}
 
-		if (th->function.acp1 == (actionf_p1)T_MoveCeiling) {
+		if (th->function == (actionf_t)T_MoveCeiling) {
 			*save_p++ = tc_ceiling;
 			PADSAVEP();
 			ceiling = (ceiling_t *)save_p;
@@ -353,7 +353,7 @@ P_ArchiveSpecials(void)
 			continue;
 		}
 
-		if (th->function.acp1 == (actionf_p1)T_VerticalDoor) {
+		if (th->function == (actionf_t)T_VerticalDoor) {
 			*save_p++ = tc_door;
 			PADSAVEP();
 			door = (vldoor_t *)save_p;
@@ -363,7 +363,7 @@ P_ArchiveSpecials(void)
 			continue;
 		}
 
-		if (th->function.acp1 == (actionf_p1)T_MoveFloor) {
+		if (th->function == (actionf_t)T_MoveFloor) {
 			*save_p++ = tc_floor;
 			PADSAVEP();
 			floor = (floormove_t *)save_p;
@@ -373,7 +373,7 @@ P_ArchiveSpecials(void)
 			continue;
 		}
 
-		if (th->function.acp1 == (actionf_p1)T_PlatRaise) {
+		if (th->function == (actionf_t)T_PlatRaise) {
 			*save_p++ = tc_plat;
 			PADSAVEP();
 			plat = (plat_t *)save_p;
@@ -383,7 +383,7 @@ P_ArchiveSpecials(void)
 			continue;
 		}
 
-		if (th->function.acp1 == (actionf_p1)T_LightFlash) {
+		if (th->function == (actionf_t)T_LightFlash) {
 			*save_p++ = tc_flash;
 			PADSAVEP();
 			flash = (lightflash_t *)save_p;
@@ -393,7 +393,7 @@ P_ArchiveSpecials(void)
 			continue;
 		}
 
-		if (th->function.acp1 == (actionf_p1)T_StrobeFlash) {
+		if (th->function == (actionf_t)T_StrobeFlash) {
 			*save_p++ = tc_strobe;
 			PADSAVEP();
 			strobe = (strobe_t *)save_p;
@@ -403,7 +403,7 @@ P_ArchiveSpecials(void)
 			continue;
 		}
 
-		if (th->function.acp1 == (actionf_p1)T_Glow) {
+		if (th->function == (actionf_t)T_Glow) {
 			*save_p++ = tc_glow;
 			PADSAVEP();
 			glow = (glow_t *)save_p;
@@ -448,8 +448,8 @@ P_UnArchiveSpecials(void)
 			ceiling->sector = &sectors[(uintptr_t)ceiling->sector];
 			ceiling->sector->specialdata = ceiling;
 
-			if (ceiling->thinker.function.acp1)
-				ceiling->thinker.function.acp1 = (actionf_p1)T_MoveCeiling;
+			if (ceiling->thinker.function)
+				ceiling->thinker.function = (actionf_t)T_MoveCeiling;
 
 			P_AddThinker(&ceiling->thinker);
 			P_AddActiveCeiling(ceiling);
@@ -462,7 +462,7 @@ P_UnArchiveSpecials(void)
 			save_p += sizeof(*door);
 			door->sector = &sectors[(uintptr_t)door->sector];
 			door->sector->specialdata = door;
-			door->thinker.function.acp1 = (actionf_p1)T_VerticalDoor;
+			door->thinker.function = (actionf_t)T_VerticalDoor;
 			P_AddThinker(&door->thinker);
 			break;
 
@@ -473,7 +473,7 @@ P_UnArchiveSpecials(void)
 			save_p += sizeof(*floor);
 			floor->sector = &sectors[(uintptr_t)floor->sector];
 			floor->sector->specialdata = floor;
-			floor->thinker.function.acp1 = (actionf_p1)T_MoveFloor;
+			floor->thinker.function = (actionf_t)T_MoveFloor;
 			P_AddThinker(&floor->thinker);
 			break;
 
@@ -485,8 +485,8 @@ P_UnArchiveSpecials(void)
 			plat->sector = &sectors[(uintptr_t)plat->sector];
 			plat->sector->specialdata = plat;
 
-			if (plat->thinker.function.acp1)
-				plat->thinker.function.acp1 = (actionf_p1)T_PlatRaise;
+			if (plat->thinker.function)
+				plat->thinker.function = (actionf_t)T_PlatRaise;
 
 			P_AddThinker(&plat->thinker);
 			P_AddActivePlat(plat);
@@ -498,7 +498,7 @@ P_UnArchiveSpecials(void)
 			memcpy(flash, save_p, sizeof(*flash));
 			save_p += sizeof(*flash);
 			flash->sector = &sectors[(uintptr_t)flash->sector];
-			flash->thinker.function.acp1 = (actionf_p1)T_LightFlash;
+			flash->thinker.function = (actionf_t)T_LightFlash;
 			P_AddThinker(&flash->thinker);
 			break;
 
@@ -508,7 +508,7 @@ P_UnArchiveSpecials(void)
 			memcpy(strobe, save_p, sizeof(*strobe));
 			save_p += sizeof(*strobe);
 			strobe->sector = &sectors[(uintptr_t)strobe->sector];
-			strobe->thinker.function.acp1 = (actionf_p1)T_StrobeFlash;
+			strobe->thinker.function = (actionf_t)T_StrobeFlash;
 			P_AddThinker(&strobe->thinker);
 			break;
 
@@ -518,7 +518,7 @@ P_UnArchiveSpecials(void)
 			memcpy(glow, save_p, sizeof(*glow));
 			save_p += sizeof(*glow);
 			glow->sector = &sectors[(uintptr_t)glow->sector];
-			glow->thinker.function.acp1 = (actionf_p1)T_Glow;
+			glow->thinker.function = (actionf_t)T_Glow;
 			P_AddThinker(&glow->thinker);
 			break;
 
