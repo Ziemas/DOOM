@@ -26,7 +26,7 @@
 // Globally visible constants.
 //
 #define HU_FONTSTART '!' // the first font characters
-#define HU_FONTEND '_'	 // the last font characters
+#define HU_FONTEND '_'   // the last font characters
 
 // Calculate # of glyphs in font.
 #define HU_FONTSIZE (HU_FONTEND - HU_FONTSTART + 1)

@@ -3,8 +3,9 @@
 
 #include "types.h"
 
-#define BIT(x) (1ULL << (x))
 #define MASK(x) (BIT(x) - 1)
+
+#define BIT(x) (1ULL << (x))
 #define GENMASK(msb, lsb) ((BIT((msb + 1) - (lsb)) - 1) << (lsb))
 #define FIELD_PREP(field, val) ((typeof(field))(val) << (__builtin_ffsll(field) - 1))
 #define FIELD_GET(field, val) (((val) & (field)) >> (__builtin_ffsll(field) - 1))

@@ -3,25 +3,25 @@
 
 #include "util.h"
 
-#define VIF_CODE_NOP      0x00
-#define VIF_CODE_STCYCL   0x01
-#define VIF_CODE_OFFSET   0x02
-#define VIF_CODE_BASE     0x03
-#define VIF_CODE_IOTP     0x04
-#define VIF_CODE_STMOD    0x05
+#define VIF_CODE_NOP 0x00
+#define VIF_CODE_STCYCL 0x01
+#define VIF_CODE_OFFSET 0x02
+#define VIF_CODE_BASE 0x03
+#define VIF_CODE_IOTP 0x04
+#define VIF_CODE_STMOD 0x05
 #define VIF_CODE_MSKPATH3 0x06
-#define VIF_CODE_MARK     0x07
-#define VIF_CODE_FLUSHE   0x10
-#define VIF_CODE_FLUSH    0x11
-#define VIF_CODE_FLUSHA   0x13
-#define VIF_CODE_MSCAL    0x14
-#define VIF_CODE_MSCALF   0x15
-#define VIF_CODE_MSCNT    0x17
-#define VIF_CODE_STMASK   0x20
-#define VIF_CODE_STROW    0x30
-#define VIF_CODE_STCOL    0x31
-#define VIF_CODE_MPG      0x4A
-#define VIF_CODE_DIRECT   0x50
+#define VIF_CODE_MARK 0x07
+#define VIF_CODE_FLUSHE 0x10
+#define VIF_CODE_FLUSH 0x11
+#define VIF_CODE_FLUSHA 0x13
+#define VIF_CODE_MSCAL 0x14
+#define VIF_CODE_MSCALF 0x15
+#define VIF_CODE_MSCNT 0x17
+#define VIF_CODE_STMASK 0x20
+#define VIF_CODE_STROW 0x30
+#define VIF_CODE_STCOL 0x31
+#define VIF_CODE_MPG 0x4A
+#define VIF_CODE_DIRECT 0x50
 #define VIF_CODE_DIRECTHL 0x51
 
 #define VIF_C_IRQ BIT(31)
@@ -43,7 +43,7 @@
 #define VIFC_MSKPATH3_MASK BIT(15)
 
 #define MAKE_VIF_CODE(_cmd, _num, _immediate) \
-    (((uint32)(_cmd) << 24) | ((uint32)(_num) << 16) | ((uint32)(_immediate)))
+	(((uint32)(_cmd) << 24) | ((uint32)(_num) << 16) | ((uint32)(_immediate)))
 
 #define VIF_NOP() (MAKE_VIF_CODE(VIF_CODE_NOP, 0, 0))
 #define VIF_STCYCL(WL, CL) (MAKE_VIF_CODE(VIF_CODE_STCYCL, 0, (WL) << 8 | (CL)))

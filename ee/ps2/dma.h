@@ -2,10 +2,10 @@
 #define DMA_H_
 
 #include "assert.h"
+#include "class.h"
 #include "gif.h"
 #include "types.h"
 #include "vif.h"
-#include "class.h"
 
 #include <stdio.h>
 

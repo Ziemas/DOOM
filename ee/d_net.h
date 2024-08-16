@@ -92,7 +92,7 @@ typedef struct {
 	// Flag: -1 = new game, 0-5 = load savegame
 	short savegame;
 	short episode; // 1-3
-	short map;	   // 1-9
+	short map;     // 1-9
 	short skill;   // 1-5
 
 	// Info specific to this node.

@@ -41,9 +41,9 @@
 // ------------------------
 // Command line parameters.
 //
-extern boolean nomonsters;	// checkparm of -nomonsters
+extern boolean nomonsters;  // checkparm of -nomonsters
 extern boolean respawnparm; // checkparm of -respawn
-extern boolean fastparm;	// checkparm of -fast
+extern boolean fastparm;    // checkparm of -fast
 
 extern boolean devparm; // DEBUG: launched with -devparm
 
@@ -97,7 +97,7 @@ extern boolean deathmatch;
 //  Sound FX volume has default, 0 - 15
 //  Music volume has default, 0 - 15
 // These are multiplied by 8.
-extern int snd_SfxVolume;	// maximum volume for sound
+extern int snd_SfxVolume;   // maximum volume for sound
 extern int snd_MusicVolume; // maximum volume for music
 
 // Current music/sfx card - index useless
@@ -120,8 +120,8 @@ extern int snd_DesiredSfxDevice;
 extern boolean statusbaractive;
 
 extern boolean automapactive; // In AutoMap mode?
-extern boolean menuactive;	  // Menu overlayed?
-extern boolean paused;		  // Game Pause?
+extern boolean menuactive;    // Menu overlayed?
+extern boolean paused;        // Game Pause?
 
 extern boolean viewactive;
 
@@ -152,7 +152,7 @@ extern int totalsecret;
 
 // Timer, for scores.
 extern int levelstarttic; // gametic at level start
-extern int leveltime;	  // tics in game play for par
+extern int leveltime;     // tics in game play for par
 
 // --------------------------------------
 // DEMO playback/recording related stuff.

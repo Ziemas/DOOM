@@ -27,7 +27,7 @@
 #pragma interface
 #endif
 
-typedef void (*actionf_t)(void*, void*);
+typedef void (*actionf_t)(void *, void *);
 
 // Historically, "think_t" is yet another
 //  function pointer to a routine to handle

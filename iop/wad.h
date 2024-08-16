@@ -3,7 +3,6 @@
 
 #include "types.h"
 
-
 struct wadinfo {
 	// Should be "IWAD" or "PWAD".
 	char identification[4];

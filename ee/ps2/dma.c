@@ -35,7 +35,7 @@ dmaResetPath()
 	};
 
 	write32(VIF1_R_FBRST, VIF_FBRST_RST); // reset vif1
-	write32(VIF1_R_ERR, VIF_ERR_ME0);	  // mask tag mismatch
+	write32(VIF1_R_ERR, VIF_ERR_ME0);     // mask tag mismatch
 
 	// Reset VU1 by setting RS1 in FBRST
 	__asm__ volatile("sync          \n"

@@ -116,7 +116,7 @@ typedef struct {
 	boolean *on;
 
 	patch_t *p; // icon
-	int data;	// user data
+	int data;   // user data
 
 } st_binicon_t;
 

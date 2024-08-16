@@ -210,9 +210,9 @@ typedef struct mobj_s {
 	struct mobj_s *sprev;
 
 	// More drawing info: to determine current sprite.
-	angle_t angle;		// orientation
+	angle_t angle;      // orientation
 	spritenum_t sprite; // used to find patch_t and flip value
-	int frame;			// might be ORed with FF_FULLBRIGHT
+	int frame;          // might be ORed with FF_FULLBRIGHT
 
 	// Interaction info, by BLOCKMAP.
 	// Links in blocks (if needed).
