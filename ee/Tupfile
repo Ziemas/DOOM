@@ -13,8 +13,7 @@ IRXS += $(IRX_DIR)/usbd.irx $(IRX_DIR)/usbmass_bd.irx $(IRX_DIR)/bdmfs_fatfs.irx
 
 
 # sad, hope i can figure something out
-#: ../<imp> |> bin2c %<imp> %o %<imp>_data |> %b.c
-#: ../imp.irx | ../<imp> |> !b2c |>
+: ../<imp> |> bin2c %<imp> %o imp_data |> imp_bin.c
 : foreach $(IRXS) |> !b2c |>
 : foreach *.c |> !cc |>
 : foreach ps2/*.c |> !cc |>

@@ -52,6 +52,9 @@ extern unsigned int usbmass_bd_data[];
 extern unsigned int size_sio2man_data;
 extern unsigned int sio2man_data[];
 
+extern unsigned int size_imp_data;
+extern unsigned int imp_data[];
+
 int
 main(int argc, char **argv)
 {
@@ -100,7 +103,7 @@ main(int argc, char **argv)
 		I_Error("Failed to load padman");
 	}
 
-	module = SifLoadModule("host:imp.irx", 0, NULL);
+	module = SifExecModuleBuffer(imp_data, size_imp_data, 0, NULL, NULL);
 	if (module < 0) {
 		I_Error("Failed to load IMP");
 	}
