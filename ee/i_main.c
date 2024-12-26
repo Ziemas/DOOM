@@ -31,6 +31,9 @@
 #include <sifrpc.h>
 #include <unistd.h>
 
+extern unsigned int size_timrman_data;
+extern unsigned int timrman_data[];
+
 extern unsigned int size_libsd_data;
 extern unsigned int libsd_data[];
 
@@ -67,6 +70,11 @@ main(int argc, char **argv)
 
 	sbv_patch_enable_lmb();
 	sbv_patch_disable_prefix_check();
+
+	//module = SifExecModuleBuffer(timrman_data, size_timrman_data, 0, NULL, NULL);
+	//if (module < 0) {
+	//	I_Error("Failed to load libsd");
+	//}
 
 	module = SifExecModuleBuffer(libsd_data, size_libsd_data, 0, NULL, NULL);
 	if (module < 0) {

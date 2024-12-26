@@ -6,6 +6,7 @@
 #include <ioman.h>
 #include <libsd.h>
 #include <intrman.h>
+#include <xtimrman.h>
 
 sysmem_IMPORTS_start
 I_AllocSysMemory
@@ -60,3 +61,12 @@ intrman_IMPORTS_start
 I_CpuSuspendIntr
 I_CpuResumeIntr
 intrman_IMPORTS_end
+
+timrman_IMPORTS_start
+I_AllocHardTimer
+I_FreeHardTimer
+I_SetTimerHandler
+I_SetupHardTimer
+I_StartHardTimer
+I_StopHardTimer
+timrman_IMPORTS_end

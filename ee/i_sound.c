@@ -37,6 +37,7 @@
 
 // Timer stuff. Experimental.
 #include "i_sound.h"
+#include "sounds.h"
 #include "w_wad.h"
 #include "z_zone.h"
 
@@ -164,9 +165,11 @@ void
 I_BuildSoundBank()
 {
 	struct sound_header *hdr;
+	s32 sample_count, size;
 	sfxinfo_t *sfx;
 	char nbuf[9];
-	s16 *sbuf;
+	s16 *s16buf;
+	u8 *bank_alloc;
 
 	struct {
 		u8 *adpcm;
@@ -175,6 +178,8 @@ I_BuildSoundBank()
 	} sound[NUMSFX];
 
 	memset(sound, 0, sizeof(sound));
+
+	printf("starting sample conversion\n");
 
 	for (int i = 1; i < NUMSFX; i++) {
 		sfx = &S_sfx[i];
@@ -186,18 +191,31 @@ I_BuildSoundBank()
 		}
 
 		hdr = W_CacheLumpNum(lump, PU_CACHE);
-		sbuf = malloc(hdr->sample_count * 2);
+		// we don't care about the padding bytes
+		sample_count = hdr->sample_count - 32;
+		printf("sample_count %d\n", sample_count);
 
-		sound[i].size = psx_audio_spu_get_buffer_size(hdr->sample_count);
+		s16buf = malloc(sample_count * 2);
+
+		sound[i].size = psx_audio_spu_get_buffer_size(sample_count);
 		sound[i].adpcm = malloc(sound[i].size);
 
-		pcm8to16(sbuf, hdr->samples, hdr->sample_count);
-		psx_audio_spu_encode_simple(sbuf, hdr->sample_count, sound[i].adpcm, -1);
+		// + 16 to skip start padding
+		pcm8to16(s16buf, hdr->samples + 16, sample_count);
+		psx_audio_spu_encode_simple(s16buf, sample_count, sound[i].adpcm, -1);
 
 		sound[i].pitch = rate_to_pitch(hdr->rate);
 
-		free(sbuf);
+		free(s16buf);
 	}
+
+	size = ALIGN_UP(sizeof(struct impSoundBank) + sizeof(struct impSoundEntry) * NUMSFX, 16);
+	for (int i = 0; i < NUMSFX; i++) {
+		size += sound[i].size;
+	}
+
+	printf("total sound bank size 0x%x\n", size);
+	bank_alloc = malloc(size);
 
 	for (int i = 1; i < NUMSFX; i++) {
 		free(sound[i].adpcm);
@@ -207,7 +225,7 @@ I_BuildSoundBank()
 void
 I_InitSound()
 {
-	I_BuildSoundBank();
+	//I_BuildSoundBank();
 }
 
 void

@@ -35,7 +35,7 @@ imp_c_PlaySound(struct impCommand *cmd, u32 *ret)
 {
 	struct playSound *s = &cmd->snd;
 
-	printf("playsnd: %d %d %d\n", s->id, s->vol, s->priority);
+	//printf("playsnd: %d %d %d\n", s->id, s->vol, s->priority);
 
 	*ret = 0;
 }
@@ -137,7 +137,7 @@ _start()
 
 	StartThread(rpcThreadId, 0);
 
-	imp_IdentifyVersion();
+	//imp_IdentifyVersion();
 
 	//imp_InitSound();
 

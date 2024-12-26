@@ -1,7 +1,7 @@
 include_rules
 CC = mipsel-ps2-irx-gcc
 
-CFLAGS += -D_IOP -fno-builtin -msoft-float -mno-explicit-relocs
+CFLAGS += -D_IOP -fno-builtin -msoft-float -mno-explicit-relocs -O2
 LDFLAGS = -nostdlib -s
 INC += -I$(PS2SDK)/iop/include
 OUT = $(TOP_DIR)/imp.irx

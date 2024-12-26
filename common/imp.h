@@ -2,6 +2,23 @@
 #define IMP_H_
 
 #include "types.h"
+#define ALIGN_UP(n, a) (((n) + a) & ~(((typeof(n))(a)) - 1))
+#define FOURCC(a,b,c,d) ( (uint32) (((d)<<24) | ((c)<<16) | ((b)<<8) | (a)) )
+
+struct impSoundEntry {
+	u32 start_addr;
+	u32 size;
+	u32 pitch;
+	u16 flags;
+	s16 volume;
+};
+
+struct impSoundBank {
+	u32 magic;
+	u32 total_size;
+	u32 adpcm_size;
+	struct impSoundEntry sounds[0];
+};
 
 #define IMP_MESSAGE_RPC 0x123457
 #define MAX_CMDBUF_ENTRIES 64

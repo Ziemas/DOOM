@@ -1,7 +1,6 @@
 #include "wad.h"
 
 #include "list.h"
-#include "sound_data.h"
 #include "sysmem.h"
 
 #include <intrman.h>
@@ -17,16 +16,33 @@ struct wad_file {
 	struct filelump lumps[0];
 };
 
+// djb hash
+static unsigned long
+hash(unsigned char *str)
+{
+	unsigned long hash = 5381;
+    int c, i;
+
+	i = 0;
+    while ((c = *str++) && i < 8) {
+        hash = ((hash << 5) + hash) + c; /* hash * 33 + c */
+		i++;
+	}
+
+    return hash;
+}
+
 int
 imp_AddFile(char *filename)
 {
 	struct wadinfo header;
 	struct wad_file *wad;
-	int fd, i, istate;
+	int fd, istate;
 
+	printf("imp: opening %s\n", filename);
 	fd = open(filename, O_RDONLY);
 	if (fd < 0) {
-		printf("failed to open wad\n");
+		printf("couldn't find %s\n", filename);
 		return -1;
 	}
 
