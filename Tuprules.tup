@@ -1,6 +1,6 @@
 TOP_DIR = $(TUP_CWD)
 import PS2SDK
-CFLAGS = -std=gnu2x -G0 -O3 -g -fno-exceptions -fno-common -fno-strict-aliasing \
+CFLAGS = -std=gnu2x -G0 -fno-exceptions -fno-common -fno-strict-aliasing \
          -fwrapv -Wall -Werror-implicit-function-declaration -fdiagnostics-color=always
 INC = -I$(PS2SDK)/common/include -I$(TOP_DIR)/common
 LIBS =
