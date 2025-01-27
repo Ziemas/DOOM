@@ -1,0 +1,10 @@
+CC = mipsel-none-elf-gcc
+STRIP = mipsel-none-elf-strip
+
+CFLAGS += -D_IOP -O2 -fno-builtin -msoft-float -mno-explicit-relocs -gdwarf-2 -gz
+LDFLAGS = -T $(PS2SDK)/iop/startup/linkfile -nostdlib -dc -r
+INC += -I$(PS2SDK)/iop/include
+OUT = $(TOP_DIR)/imp.irx
+
+!iopstrip = |> $(STRIP) --strip-unneeded --remove-section=.pdr --remove-section=.comment --remove-section=.mdebug.abi32 --remove-section=.gnu.attributes -o %o %f |>
+!iopfixup = |> srxfixup --irx1 -o %o %f |>
