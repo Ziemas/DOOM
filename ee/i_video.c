@@ -77,8 +77,8 @@ struct dmaBuffers {
 };
 
 struct dmaBuffers dma_buffers;
-// uint128 gif_buffer[16 * 1024] __attribute__((aligned(128)));
-static uint128 *const gif_buffer = (uint128 *)0x70000000;
+uint128 gif_buffer_storage[16 * 1024] __attribute__((aligned(128)));
+static uint128 *gif_buffer = NULL;
 #define SP_SIZE (1024 * 16)
 
 bool pal_dirty = false;
@@ -518,6 +518,7 @@ I_FinishUpdate(void)
 	SetDraw(&dma_buffers.draw[f], &list);
 	Clear(&list, 0x80, 0x0, 0x0);
 
+	SyncDCache(screens[0], &screens[0][512 * 256]);
 	UploadImage(&list, screens[0], SCREENWIDTH, SCREENHEIGHT, GS_PSMT8H, screenStart);
 
 	if (pal_dirty) {
@@ -529,8 +530,12 @@ I_FinishUpdate(void)
 	dmaFinish(&list);
 
 	// dumpDma(list.start, 1);
+
+	EE_SYNCL();
 	dmaSend(DMA_CHAN_GIF, &list);
 
+	// Eeh, surely we'd do this before sending anything
+	// or editing dma lists in progress
 	dmaSyncPath();
 
 	graphWaitVSync();
@@ -556,13 +561,14 @@ void
 I_SetPalette(byte *palette)
 {
 	byte *gamma = gammatable[usegamma];
+	struct color *pbuf = UCA_PTR(palbuf);
 
 #define clut_shuf(x) (((x) & ~0x18) | ((((x) & 0x08) << 1) | (((x) & 0x10) >> 1)))
 	for (int i = 0; i < 256; i++) {
-		palbuf[clut_shuf(i)].r = gamma[*palette++];
-		palbuf[clut_shuf(i)].g = gamma[*palette++];
-		palbuf[clut_shuf(i)].b = gamma[*palette++];
-		palbuf[clut_shuf(i)].a = 0;
+		pbuf[clut_shuf(i)].r = gamma[*palette++];
+		pbuf[clut_shuf(i)].g = gamma[*palette++];
+		pbuf[clut_shuf(i)].b = gamma[*palette++];
+		pbuf[clut_shuf(i)].a = 0;
 	}
 #undef clut_shuf
 
@@ -679,6 +685,8 @@ I_InitGraphics(void)
 	dmaInit();
 	graphReset(GS_INTERLACE, GS_MODE_NTSC, GS_FIELD);
 	InitBuffers(&dma_buffers, OUTPUT_WIDTH, OUTPUT_HEIGHT, GS_PSMCT24, GS_PSMZ24);
+
+	gif_buffer = UCA_PTR(gif_buffer_storage);
 	dmaStart(&list, gif_buffer, SP_SIZE);
 	InitGsRegs(&list);
 	dmaFinish(&list);

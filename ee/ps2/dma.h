@@ -7,7 +7,14 @@
 #include "types.h"
 #include "vif.h"
 
+#include <stdint.h>
 #include <stdio.h>
+
+#define UNCACHED   0x20000000
+#define UNCACHED_A 0x30000000
+
+#define UC_PTR(x) ((void*)((uintptr_t)(x) | UNCACHED))
+#define UCA_PTR(x) ((void*)((uintptr_t)(x) | UNCACHED_A))
 
 enum DMA_CHAN {
 	DMA_CHAN_VIF0 = 0x10008000,

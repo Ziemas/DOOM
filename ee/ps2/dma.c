@@ -136,10 +136,12 @@ dmaWait(enum DMA_CHAN chan)
 uint32
 dmaCheckAddr(uint32 data)
 {
-	// Test if addr is on scratchpad
-	if ((data >> 28) == 7) {
-		// if so, set SPR bit
-		data = (data & 0xfffffff) | BIT(31);
+	// check if spr
+	int spr = (data >> 28) == 7;
+	data &= 0xfffffff;
+
+	if (spr) {
+		data |= BIT(31);
 	}
 
 	return data;
@@ -180,8 +182,6 @@ void
 dmaSend(enum DMA_CHAN chan, struct dmaList *list)
 {
 	uint32 chcr = 0, addr = 0;
-
-	FlushCache(0);
 
 	addr = dmaCheckAddr((uint32)list->start);
 	dmaWait(chan);
