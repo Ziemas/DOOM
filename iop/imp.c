@@ -18,7 +18,7 @@ s32 rpcThreadId = 0;
 // static u32 *retBufPos = NULL;
 
 static struct impCommandBuffer cmd_buf;
-static u32 returnBuffer[MAX_CMDBUF_ENTRIES + 1] __attribute__((aligned(64)));
+static u32 returnBuffer[MAX_CMDBUF_ENTRIES + 1] __attribute__((aligned(DMA_ALIGN)));
 
 #define MARK() (printf("RPC %s called\n", __FUNCTION__))
 

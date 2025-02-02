@@ -12,6 +12,8 @@ typedef short i16;
 typedef unsigned short u16;
 typedef signed char s8;
 typedef unsigned char u8;
+
+#define DMA_ALIGN (64)
 #endif
 
 #ifdef _IOP
@@ -24,6 +26,8 @@ typedef unsigned short u16;
 typedef signed char s8;
 typedef unsigned char u8;
 typedef unsigned int size_t;
+
+#define DMA_ALIGN (16)
 #endif
 
 #endif // TYPES_H_

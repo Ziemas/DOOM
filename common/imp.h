@@ -68,6 +68,6 @@ struct impCommand {
 struct impCommandBuffer {
 	u32 num_commands;
 	struct impCommand cmd[MAX_CMDBUF_ENTRIES];
-} __attribute__((aligned(64)));
+} __attribute__((aligned(DMA_ALIGN)));
 
 #endif // IMP_H_

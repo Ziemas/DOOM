@@ -13,7 +13,7 @@ static SifRpcClientData_t sClientData;
 static struct impCommand sSyncbuf;
 static struct impCommandBuffer sCmdBuf[2];
 static struct impCommandReturn sRetCmd[2][MAX_CMDBUF_ENTRIES];
-static u32 sRetVal[2][MAX_CMDBUF_ENTRIES + 1] __attribute__((aligned(32)));
+static u32 sRetVal[2][MAX_CMDBUF_ENTRIES + 1] __attribute__((aligned(DMA_ALIGN)));
 static u32 sBuffIdx;
 static u32 sCmdPos;
 
