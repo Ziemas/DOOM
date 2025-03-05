@@ -25,6 +25,7 @@
 #include "i_sound.h"
 #include "i_video.h"
 #include "m_misc.h"
+#include "timer.h"
 
 #include <stdarg.h>
 #include <stdio.h>
@@ -84,6 +85,16 @@ I_GetTime(void)
 		basetime = tp.tv_sec;
 	newtics = (tp.tv_sec - basetime) * TICRATE + tp.tv_usec * TICRATE / 1000000;
 	return newtics;
+}
+
+int
+I_GetTimeMS(void)
+{
+	unsigned busclock_sec;
+	unsigned busclock_usec;
+
+	TimerBusClock2USec(GetTimerSystemTime(), &busclock_sec, &busclock_usec);
+	return busclock_sec * 1000 + busclock_usec / 1000;
 }
 
 //

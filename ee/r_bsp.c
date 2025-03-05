@@ -209,6 +209,29 @@ R_ClearClipSegs(void)
 	newend = solidsegs + 2;
 }
 
+// [AM] Interpolate the passed sector, if prudent.
+void
+R_MaybeInterpolateSector(sector_t *sector)
+{
+	// Only if we moved the sector last tic.
+	if (sector->oldgametic == gametic - 1) {
+		// Interpolate between current and last floor/ceiling position.
+		if (sector->floorheight != sector->oldfloorheight)
+			sector->interpfloorheight = sector->oldfloorheight +
+			  FixedMul(sector->floorheight - sector->oldfloorheight, fractionaltic);
+		else
+			sector->interpfloorheight = sector->floorheight;
+		if (sector->ceilingheight != sector->oldceilingheight)
+			sector->interpceilingheight = sector->oldceilingheight +
+			  FixedMul(sector->ceilingheight - sector->oldceilingheight, fractionaltic);
+		else
+			sector->interpceilingheight = sector->ceilingheight;
+	} else {
+		sector->interpfloorheight = sector->floorheight;
+		sector->interpceilingheight = sector->ceilingheight;
+	}
+}
+
 //
 // R_AddLine
 // Clips the given segment
@@ -280,14 +303,19 @@ R_AddLine(seg_t *line)
 	if (!backsector)
 		goto clipsolid;
 
+	// [AM] Interpolate sector movement before
+	//      running clipping tests.  Frontsector
+	//      should already be interpolated.
+	R_MaybeInterpolateSector(backsector);
+
 	// Closed door.
-	if (backsector->ceilingheight <= frontsector->floorheight ||
-	  backsector->floorheight >= frontsector->ceilingheight)
+	if (backsector->interpceilingheight <= frontsector->interpfloorheight ||
+	  backsector->interpfloorheight >= frontsector->interpceilingheight)
 		goto clipsolid;
 
 	// Window.
-	if (backsector->ceilingheight != frontsector->ceilingheight ||
-	  backsector->floorheight != frontsector->floorheight)
+	if (backsector->interpceilingheight != frontsector->interpceilingheight ||
+	  backsector->interpfloorheight != frontsector->interpfloorheight)
 		goto clippass;
 
 	// Reject empty lines used for triggers
@@ -446,14 +474,18 @@ R_Subsector(int num)
 	count = sub->numlines;
 	line = &segs[sub->firstline];
 
-	if (frontsector->floorheight < viewz) {
-		floorplane = R_FindPlane(frontsector->floorheight, frontsector->floorpic,
+	// [AM] Interpolate sector movement.  Usually only needed
+	//      when you're standing inside the sector.
+	R_MaybeInterpolateSector(frontsector);
+
+	if (frontsector->interpfloorheight < viewz) {
+		floorplane = R_FindPlane(frontsector->interpfloorheight, frontsector->floorpic,
 		  frontsector->lightlevel);
 	} else
 		floorplane = NULL;
 
-	if (frontsector->ceilingheight > viewz || frontsector->ceilingpic == skyflatnum) {
-		ceilingplane = R_FindPlane(frontsector->ceilingheight, frontsector->ceilingpic,
+	if (frontsector->interpceilingheight > viewz || frontsector->ceilingpic == skyflatnum) {
+		ceilingplane = R_FindPlane(frontsector->interpceilingheight, frontsector->ceilingpic,
 		  frontsector->lightlevel);
 	} else
 		ceilingplane = NULL;

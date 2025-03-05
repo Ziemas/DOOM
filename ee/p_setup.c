@@ -70,7 +70,7 @@ side_t *sides;
 //
 // Blockmap size.
 int bmapwidth;
-int bmapheight;	 // size in mapblocks
+int bmapheight;  // size in mapblocks
 short *blockmap; // int for larger maps
 // offsets in blockmap are from here
 short *blockmaplump;
@@ -227,6 +227,15 @@ P_LoadSectors(int lump)
 		ss->special = SHORT(ms->special);
 		ss->tag = SHORT(ms->tag);
 		ss->thinglist = NULL;
+
+		// [AM] Sector interpolation.  Even if we're
+		//      not running uncapped, the renderer still
+		//      uses this data.
+		ss->oldfloorheight = ss->floorheight;
+		ss->interpfloorheight = ss->floorheight;
+		ss->oldceilingheight = ss->ceilingheight;
+		ss->interpceilingheight = ss->ceilingheight;
+		ss->oldgametic = 0;
 	}
 
 	Z_Free(data);

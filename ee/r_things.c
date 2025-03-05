@@ -425,9 +425,33 @@ R_ProjectSprite(mobj_t *thing)
 	angle_t ang;
 	fixed_t iscale;
 
+	fixed_t interpx;
+	fixed_t interpy;
+	fixed_t interpz;
+	fixed_t interpangle;
+
+	// [AM] Interpolate between current and last position,
+	//      if prudent.
+	//
+	// Don't interpolate if the mobj did something
+	// that would necessitate turning it off for a tic.
+	if (thing->interp == true &&
+	  // Don't interpolate during a paused state.
+	  !paused && !menuactive) {
+		interpx = thing->oldx + FixedMul(thing->x - thing->oldx, fractionaltic);
+		interpy = thing->oldy + FixedMul(thing->y - thing->oldy, fractionaltic);
+		interpz = thing->oldz + FixedMul(thing->z - thing->oldz, fractionaltic);
+		interpangle = R_InterpolateAngle(thing->oldangle, thing->angle, fractionaltic);
+	} else {
+		interpx = thing->x;
+		interpy = thing->y;
+		interpz = thing->z;
+		interpangle = thing->angle;
+	}
+
 	// transform the origin point
-	tr_x = thing->x - viewx;
-	tr_y = thing->y - viewy;
+	tr_x = interpx - viewx;
+	tr_y = interpy - viewy;
 
 	gxt = FixedMul(tr_x, viewcos);
 	gyt = -FixedMul(tr_y, viewsin);
@@ -448,7 +472,7 @@ R_ProjectSprite(mobj_t *thing)
 	if (abs(tx) > (tz << 2))
 		return;
 
-		// decide which patch to use for sprite relative to player
+	// decide which patch to use for sprite relative to player
 #ifdef RANGECHECK
 	if ((unsigned)thing->sprite >= numsprites)
 		I_Error("R_ProjectSprite: invalid sprite number %i ", thing->sprite);
@@ -462,8 +486,8 @@ R_ProjectSprite(mobj_t *thing)
 
 	if (sprframe->rotate) {
 		// choose a different rotation based on player view
-		ang = R_PointToAngle(thing->x, thing->y);
-		rot = (ang - thing->angle + (unsigned)(ANG45 / 2) * 9) >> 29;
+		ang = R_PointToAngle(interpx, interpy);
+		rot = (ang - interpangle + (unsigned)(ANG45 / 2) * 9) >> 29;
 		lump = sprframe->lump[rot];
 		flip = (boolean)sprframe->flip[rot];
 	} else {
@@ -491,10 +515,10 @@ R_ProjectSprite(mobj_t *thing)
 	vis = R_NewVisSprite();
 	vis->mobjflags = thing->flags;
 	vis->scale = xscale << detailshift;
-	vis->gx = thing->x;
-	vis->gy = thing->y;
-	vis->gz = thing->z;
-	vis->gzt = thing->z + spritetopoffset[lump];
+	vis->gx = interpx;
+	vis->gy = interpy;
+	vis->gz = interpz;
+	vis->gzt = interpz + spritetopoffset[lump];
 	vis->texturemid = vis->gzt - viewz;
 	vis->x1 = x1 < 0 ? 0 : x1;
 	vis->x2 = x2 >= viewwidth ? viewwidth - 1 : x2;

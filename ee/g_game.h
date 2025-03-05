@@ -24,6 +24,8 @@
 #include "d_event.h"
 #include "doomdef.h"
 
+extern boolean paused;
+
 //
 // GAME
 //
