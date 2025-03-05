@@ -28,6 +28,7 @@
 #include "s_sound.h"
 #include "w_wad.h"
 #include "z_zone.h"
+#include "i_video.h"
 
 #include <ctype.h>
 
@@ -62,6 +63,7 @@ char chat_char; // remove later.
 static player_t *plr;
 patch_t *hu_font[HU_FONTSIZE];
 static hu_textline_t w_title;
+static hu_textline_t w_fps;
 boolean chat_on;
 static hu_itext_t w_chat;
 static boolean always_off = false;
@@ -267,6 +269,8 @@ HU_Start(void)
 	// create the map title widget
 	HUlib_initTextLine(&w_title, HU_TITLEX, HU_TITLEY, hu_font, HU_FONTSTART);
 
+	HUlib_initTextLine(&w_fps, 320 - 8 * hu_font['A' - HU_FONTSTART]->width, HU_MSGY, hu_font, HU_FONTSTART);
+
 	switch (gamemode) {
 	case shareware:
 	case registered:
@@ -308,6 +312,7 @@ HU_Drawer(void)
 
 	HUlib_drawSText(&w_message);
 	HUlib_drawIText(&w_chat);
+	HUlib_drawTextLine(&w_fps, false);
 	if (automapactive)
 		HUlib_drawTextLine(&w_title, false);
 }
@@ -319,6 +324,7 @@ HU_Erase(void)
 	HUlib_eraseSText(&w_message);
 	HUlib_eraseIText(&w_chat);
 	HUlib_eraseTextLine(&w_title);
+	HUlib_eraseTextLine(&w_fps);
 }
 
 void
@@ -326,7 +332,7 @@ HU_Ticker(void)
 {
 
 	int i, rc;
-	char c;
+	char c, str[32], *s;
 
 	// tick down message counter if message is up
 	if (message_counter && !--message_counter) {
@@ -382,6 +388,14 @@ HU_Ticker(void)
 			}
 		}
 	}
+
+	snprintf(str, sizeof(str), "%-4d FPS", g_fps);
+	HUlib_clearTextLine(&w_fps);
+	s = str;
+	while (*s) {
+		HUlib_addCharToTextLine(&w_fps, *(s++));
+	}
+
 }
 
 #define QUEUESIZE 128

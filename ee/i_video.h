@@ -27,6 +27,8 @@
 #pragma interface
 #endif
 
+extern int g_fps;
+
 // Called by D_DoomMain,
 // determines the hardware configuration
 // and sets up the video mode

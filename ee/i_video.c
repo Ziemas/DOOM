@@ -27,6 +27,7 @@
 #include "ps2/dma.h"
 #include "ps2/graph.h"
 #include "ps2/gs_regs.h"
+#include "timer.h"
 #include "v_video.h"
 
 #include <kernel.h>
@@ -35,6 +36,8 @@
 
 #define OUTPUT_WIDTH 640
 #define OUTPUT_HEIGHT 448
+
+int g_fps;
 
 uint32 gsAllocPtr;
 uint32 screenStart;
@@ -504,6 +507,28 @@ DrawFrame(struct dmaList *list)
 	dmaAddAD(list, GS_R_XYZ2, GS_SET_XYZ(((x + w)) << 4, ((y + h)) << 4, 0));
 }
 
+/* Code borrewde from crispy, stupid changes */
+static void
+updateFPS()
+{
+	static int lastmili;
+	static int fpscount;
+	uint32 busclock_sec;
+	uint32 busclock_usec;
+	int time, mili;
+
+	fpscount++;
+	TimerBusClock2USec(GetTimerSystemTime(), &busclock_sec, &busclock_usec);
+
+	time = busclock_sec * 1000 + busclock_usec / 1000;
+	mili = time - lastmili;
+	if (mili >= 1000) {
+		g_fps = (fpscount * 1000) / mili;
+		fpscount = 0;
+		lastmili = time;
+	}
+}
+
 //
 // I_FinishUpdate
 //
@@ -538,6 +563,7 @@ I_FinishUpdate(void)
 	// or editing dma lists in progress
 	dmaSyncPath();
 
+	updateFPS();
 	graphWaitVSync();
 
 	SetDisp(&dma_buffers.disp[f]);

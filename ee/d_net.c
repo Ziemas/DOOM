@@ -619,6 +619,10 @@ TryRunTics(void)
 	else
 		counts = availabletics;
 
+	// PS2: uncap framerate here, wait for vsync in i_video
+	if (counts == 0 && gametic)
+		return;
+
 	if (counts < 1)
 		counts = 1;
 
