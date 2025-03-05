@@ -24,6 +24,9 @@
 #ifndef __P_SPEC__
 #define __P_SPEC__
 
+#include "d_player.h"
+#include "r_defs.h"
+
 //
 // End-level timer (-TIMER option)
 //
@@ -70,6 +73,8 @@ int P_FindSectorFromLineTag(line_t *line, int start);
 int P_FindMinSurroundingLight(sector_t *sector, int max);
 
 sector_t *getNextSector(line_t *line, sector_t *sec);
+
+void P_InterpolateTextureOffsets(void);
 
 //
 // SPECIAL

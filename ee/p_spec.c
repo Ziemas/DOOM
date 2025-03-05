@@ -438,7 +438,7 @@ P_CrossSpecialLine(int linenum, int side, mobj_t *thing)
 		case 97:  // TELEPORT RETRIGGER
 		case 125: // TELEPORT MONSTERONLY TRIGGER
 		case 126: // TELEPORT MONSTERONLY RETRIGGER
-		case 4:	  // RAISE DOOR
+		case 4:   // RAISE DOOR
 		case 10:  // PLAT DOWN-WAIT-UP-STAY TRIGGER
 		case 88:  // PLAT DOWN-WAIT-UP-STAY RETRIGGER
 			ok = 1;
@@ -1008,8 +1008,9 @@ P_UpdateSpecials(void)
 		line = linespeciallist[i];
 		switch (line->special) {
 		case 48:
-			// EFFECT FIRSTCOL SCROLL +
-			sides[line->sidenum[0]].textureoffset += FRACUNIT;
+			// [crispy] smooth texture scrolling
+			sides[line->sidenum[0]].basetextureoffset += FRACUNIT;
+			sides[line->sidenum[0]].textureoffset = sides[line->sidenum[0]].basetextureoffset;
 			break;
 		}
 	}
@@ -1036,6 +1037,24 @@ P_UpdateSpecials(void)
 				memset(&buttonlist[i], 0, sizeof(button_t));
 			}
 		}
+}
+
+// [crispy] smooth texture scrolling
+
+void
+P_InterpolateTextureOffsets(void)
+{
+	int i;
+
+	if (leveltime > oldleveltime) {
+		for (i = 0; i < numlinespecials; i++) {
+			const line_t *line = linespeciallist[i];
+			if (line->special == 48) {
+				side_t *const side = &sides[line->sidenum[0]];
+				side->textureoffset = side->basetextureoffset + fractionaltic;
+			}
+		}
+	}
 }
 
 //

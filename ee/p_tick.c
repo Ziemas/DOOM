@@ -26,6 +26,7 @@
 #include "z_zone.h"
 
 int leveltime;
+int oldleveltime;
 
 //
 // THINKERS

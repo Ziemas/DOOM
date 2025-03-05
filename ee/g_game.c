@@ -648,6 +648,8 @@ G_Ticker(void)
 		}
 	}
 
+	oldleveltime = leveltime;
+
 	// do main actions
 	switch (gamestate) {
 	case GS_LEVEL:

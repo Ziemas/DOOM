@@ -427,6 +427,9 @@ P_LoadSideDefs(int lump)
 		sd->bottomtexture = R_TextureNumForName(msd->bottomtexture);
 		sd->midtexture = R_TextureNumForName(msd->midtexture);
 		sd->sector = &sectors[SHORT(msd->sector)];
+
+		// [crispy] smooth texture scrolling
+		sd->basetextureoffset = sd->textureoffset;
 	}
 
 	Z_Free(data);
@@ -594,6 +597,7 @@ P_SetupLevel(int episode, int map, int playermask, skill_t skill)
 	lumpnum = W_GetNumForName(lumpname);
 
 	leveltime = 0;
+	oldleveltime = 0;
 
 	// note: most of this ordering is important
 	P_LoadBlockMap(lumpnum + ML_BLOCKMAP);

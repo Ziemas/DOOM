@@ -437,7 +437,7 @@ R_ProjectSprite(mobj_t *thing)
 	// that would necessitate turning it off for a tic.
 	if (thing->interp == true &&
 	  // Don't interpolate during a paused state.
-	  !paused && !menuactive) {
+	  leveltime > oldleveltime) {
 		interpx = thing->oldx + FixedMul(thing->x - thing->oldx, fractionaltic);
 		interpy = thing->oldy + FixedMul(thing->y - thing->oldy, fractionaltic);
 		interpz = thing->oldz + FixedMul(thing->z - thing->oldz, fractionaltic);

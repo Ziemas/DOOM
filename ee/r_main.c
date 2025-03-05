@@ -27,6 +27,7 @@
 #include "doomstat.h"
 #include "i_system.h"
 #include "m_bbox.h"
+#include "p_spec.h"
 #include "p_tick.h"
 #include "r_local.h"
 #include "r_sky.h"
@@ -758,7 +759,7 @@ R_SetupFrame(player_t *player)
 	  // that would necessitate turning it off for a tic.
 	  player->mo->interp == true &&
 	  // Don't interpolate during a paused state
-	  !paused && !menuactive) {
+	  leveltime > oldleveltime) {
 		// Interpolate player camera from their old position to their current one.
 		viewx = player->mo->oldx + FixedMul(player->mo->x - player->mo->oldx, fractionaltic);
 		viewy = player->mo->oldy + FixedMul(player->mo->y - player->mo->oldy, fractionaltic);
@@ -809,6 +810,9 @@ R_RenderPlayerView(player_t *player)
 
 	// check for new console commands.
 	NetUpdate();
+
+	// [crispy] smooth texture scrolling
+	P_InterpolateTextureOffsets();
 
 	// The head node is the last node output.
 	R_RenderBSPNode(numnodes - 1);
